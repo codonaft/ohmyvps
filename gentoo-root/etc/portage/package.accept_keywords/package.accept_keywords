@@ -1,0 +1,3 @@
+app-admin/i2pd-tools ~*
+app-crypt/mkp224o ~*
+sys-kernel/vanilla-sources ~*

@@ -1,0 +1,10 @@
+app-antivirus/clamav clamonacc
+app-misc/mime-types nginx
+app-misc/tmux vim-syntax
+app-portage/eix sqlite
+net-firewall/iptables conntrack netlink nftables
+net-misc/socat tcpd
+net-vpn/i2pd i2p-hardening
+sys-kernel/vanilla-sources::gentoo symlink
+sys-libs/libseccomp static-libs
+www-servers/nginx aio http3

@@ -1,0 +1,2 @@
+# Hostname fallback if /etc/hostname does not exist
+hostname="HOSTNAME_WILL_BE_AUTOMATICALLY_REPLACED"

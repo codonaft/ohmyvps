@@ -1,0 +1,49 @@
+#!/bin/sh
+
+set -x
+
+NET_IFACE="NET_IFACE_WILL_BE_AUTOMATICALLY_REPLACED"
+SSH_PORT="SSH_PORT_WILL_BE_AUTOMATICALLY_REPLACED"
+
+DISTCC_PORT="3632"
+
+iptables -F
+iptables -X
+
+# tor
+iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8118:9050 --sport 1:65000
+iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8118:9050
+iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tor
+
+# tinyproxy
+iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
+iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
+iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
+
+# ssh
+#for i in 1.2.3.4 5.6.7.0/24 ; do
+#  iptables -A INPUT -i "${NET_IFACE}" -p tcp -s "$i" --dport "${SSH_PORT}" -j ACCEPT # allow list
+#done
+iptables -A INPUT -p tcp --dport "${SSH_PORT}" -j ACCEPT # allow all
+
+# distcc
+#iptables -A INPUT -i "${NET_IFACE}" -p tcp --dport "${DISTCC_PORT}" -j ACCEPT
+
+# i2pd
+iptables -A OUTPUT -j ACCEPT -m owner --uid-owner i2pd
+
+# rtorrent
+iptables -A INPUT -p tcp --match multiport --dports 49164:49172 -j ACCEPT
+iptables -A INPUT -p udp --match multiport --dports 49164:49172 -j ACCEPT
+
+## for DNS with weird port; might be useful for some ISPs that block traffic to port 53
+# iptables -t nat -A OUTPUT -p tcp -d 9.9.9.9 --dport 53 -j DNAT --to-destination 9.9.9.9:9953
+# iptables -t nat -A OUTPUT -p udp -d 9.9.9.9 --dport 53 -j DNAT --to-destination 9.9.9.9:9953
+# iptables -t nat -A OUTPUT -p tcp -d 9.9.9.11 --dport 53 -j DNAT --to-destination 9.9.9.11:9953
+# iptables -t nat -A OUTPUT -p udp -d 9.9.9.11 --dport 53 -j DNAT --to-destination 9.9.9.11:9953
+
+# disallow all incoming connections by default
+iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i "${NET_IFACE}" -j DROP

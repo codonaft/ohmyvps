@@ -1,0 +1,2 @@
+gentoo/home/*/.ssh/id_*
+gentoo/etc/ssh/*_key*
