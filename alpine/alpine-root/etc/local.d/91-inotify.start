@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+
+inotifywait --event close_write,moved_to,create --monitor --recursive /etc/local.d/ |
+  while read -r directory events filename ; do
+    rc-service --ifstarted local restart 2>>/dev/stdout | logger
+  done &
+
+[ -f /etc/init.d/i2pd ] && inotifywait --event close_write,moved_to,create --monitor --recursive /etc/i2pd/ |
+  while read -r directory events filename ; do
+    if [[ "${filename}" == *".conf" ]] ; then
+      rc-service --ifstarted i2pd restart 2>>/dev/stdout | logger
+    fi
+  done &
+
+[ -f /etc/init.d/nginx ] && inotifywait --event close_write,moved_to,create --monitor --recursive /etc/nginx/ |
+  while read -r directory events filename ; do
+    if [[ "${filename}" == *".conf" ]] ; then
+      rc-service --ifstarted nginx reload 2>>/dev/stdout | logger
+    fi
+  done &
+
+[ -f /etc/init.d/sshd ] && inotifywait --event close_write,moved_to,create --monitor --recursive /etc/ssh/ |
+  while read -r directory events filename ; do
+    if [[ "${filename}" == *".conf" || "${filename}" == "sshd_config" ]] ; then
+      rc-service --ifstarted sshd reload 2>>/dev/stdout | logger
+    fi
+  done &
+
+[ -f /etc/init.d/tinyproxy ] && inotifywait --event close_write,moved_to,create --monitor --recursive /etc/tinyproxy/ |
+  while read -r directory events filename ; do
+    if [[ "${filename}" == *".conf" ]] ; then
+      rc-service --ifstarted tinyproxy reload 2>>/dev/stdout | logger
+    fi
+  done &
+
+[ -f /etc/init.d/tor ] && inotifywait --event close_write,moved_to,create --monitor --recursive /etc/tor/ |
+  while read -r directory events filename ; do
+    if [[ "${filename}" == "torrc" ]] ; then
+      rc-service --ifstarted tor reload 2>>/dev/stdout | logger
+    fi
+  done &

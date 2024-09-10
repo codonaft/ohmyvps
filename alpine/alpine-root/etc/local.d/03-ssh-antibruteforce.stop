@@ -1,0 +1,3 @@
+#!/bin/bash
+
+kill $(ps uax | grep -E '(03-ssh-antibruteforce.start|tail -n1 -F /var/log/messages)' | grep -v grep | awk '{print $2}')

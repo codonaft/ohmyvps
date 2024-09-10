@@ -1,0 +1,25 @@
+#!/bin/sh
+
+NET_IFACE=$(netiface.sh)
+NET_IPV4=$(grep -A 3 '^auto e' /etc/network/interfaces | grep address | head -n1 | awk '{print $2}' | grepcidr -e '0.0.0.0/0')
+
+#HE_CLIENT_IPV6="" # TODO
+#busybox ip tunnel add he mode sit remote 216.66.22.2 local "${NET_IPV4}" ttl 255
+#busybox ip link set he up
+#busybox ip addr add "${HE_CLIENT_IPV6}" dev he
+#busybox ip route add ::/0 dev he
+#busybox ip -f inet6 addr
+
+#IP4MARKET_CLIENT_IPV6="" # TODO
+#busybox ip tunnel add ip4market mode sit remote 193.0.203.203 local "${NET_IPV4}" ttl 200
+#busybox ip link set ip4market up
+#busybox ip addr add "${IP4MARKET_CLIENT_IPV6}" dev ip4market
+#busybox ip route add ::/0 dev ip4market
+#busybox ip -f inet6 addr
+
+#NETASSIST_CLIENT_IPV6="" # TODO
+#busybox ip tunnel add netassist mode sit remote 62.205.132.12 local "${NET_IPV4}" ttl 200
+#busybox ip link set netassist up
+#busybox ip addr add "${NETASSIST_CLIENT_IPV6}" dev netassist
+#busybox ip route add ::/0 dev netassist
+#busybox ip -f inet6 addr

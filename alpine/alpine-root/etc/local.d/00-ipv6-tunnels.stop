@@ -1,0 +1,7 @@
+#!/bin/sh
+
+busybox ip -6 route flush dev || :
+for i in netassist ip4market he ; do
+  busybox ip link set dev "$i" down || :
+  busybox ip tunnel del "$i" || :
+done

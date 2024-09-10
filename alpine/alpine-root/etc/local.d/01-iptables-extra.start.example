@@ -1,0 +1,91 @@
+#!/bin/sh
+
+NET_IFACE=$(netiface.sh)
+ALLOWLIST="/etc/ssh/allowlist.txt"
+
+iptables -A INPUT -i "${NET_IFACE}" -p icmp -s '66.220.2.74' -j ACCEPT # HE
+
+for i in $(grepcidr -e '0.0.0.0/0' < "${ALLOWLIST}") ; do
+  iptables -A INPUT -p icmp -s "$i" -j ACCEPT
+done
+for i in $(grepcidr -e '::/0' < "${ALLOWLIST}") ; do
+  ip6tables -A INPUT -p icmpv6 -s "$i" -j ACCEPT
+done
+
+## allow ICMP traffic from all IPs
+#iptables -A INPUT -p icmp -j ACCEPT
+#ip6tables -A INPUT -p icmpv6 -j ACCEPT
+
+## allow connections to ssh from all non-banned IPs
+#[ -f /usr/sbin/sshd ] && {
+#  iptables -A INPUT -p tcp --dport "${SSH_PORT}" -j ACCEPT
+#  ip6tables -A INPUT -p tcp --dport "${SSH_PORT}" -j ACCEPT
+#}
+
+## allow HTTP/HTTPS traffic from all IPs
+#[ -f /usr/sbin/nginx ] && {
+#  for p in 80 443 ; do
+#    iptables -A INPUT -p tcp --dport "$p" -j ACCEPT
+#    ip6tables -A INPUT -p tcp --dport "$p" -j ACCEPT
+#  done
+#  iptables -A INPUT -p udp --dport 443 -j ACCEPT
+#  ip6tables -A INPUT -p udp --dport 443 -j ACCEPT
+#}
+
+# allow HTTP/HTTPS traffic from Cloudflare IPs
+{
+  [ ! -f /var/tmp/cloudflare-ipv4.txt ] || [ ! -f /var/tmp/cloudflare-ipv6.txt ] && update-cloudflare-ips.sh || :
+
+  for i in $(cat /var/tmp/cloudflare-ipv4.txt) ; do
+    #iptables -A INPUT -s "$i" -j ACCEPT
+    [ -f /usr/sbin/nginx ] && {
+      for p in 80 443 ; do
+        iptables -A INPUT -s "$i" -p tcp --dport "$p" -j ACCEPT
+      done
+      iptables -A INPUT -s "$i" -p udp --dport 443 -j ACCEPT
+    }
+  done
+
+  for i in $(cat /var/tmp/cloudflare-ipv6.txt) ; do
+    #ip6tables -A INPUT -s "$i" -j ACCEPT
+    [ -f /usr/sbin/nginx ] && {
+      for p in 80 443 ; do
+        ip6tables -A INPUT -s "$i" -p tcp --dport "$p" -j ACCEPT
+      done
+      ip6tables -A INPUT -s "$i" -p udp --dport 443 -j ACCEPT
+    }
+  done
+} &
+
+[ -f /usr/bin/tor ] && {
+  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8118:9050 --sport 1:65000
+  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8118:9050
+  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tor
+}
+
+[ -f /usr/bin/tinyproxy ] && {
+  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
+  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
+  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
+}
+
+[ -f /usr/sbin/i2pd ] && {
+  iptables -A OUTPUT -j ACCEPT -m owner --uid-owner i2pd
+  #iptables -A INPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
+  #iptables -A OUTPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
+  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 7070:4444 --sport 1:65000
+  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 7070:4444
+  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner i2pd
+}
+
+[ -f /usr/bin/tinyproxy ] && {
+  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
+  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
+  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
+}
+
+wait

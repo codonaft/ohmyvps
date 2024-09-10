@@ -1,0 +1,12 @@
+# Configuration for /etc/init.d/nginx
+
+# The nginx binary to run. If you want to use debugging log, install package
+# "nginx-debug" and set this variable to "/usr/sbin/nginx-debug".
+# See http://nginx.org/en/docs/debugging_log.html for more information.
+#command="/usr/sbin/nginx"
+
+command_user="nginx"
+#command="/usr/bin/authbind" # FIXME: package doesn't exist
+#command_args="--deep /usr/sbin/nginx -c $cfgfile"
+
+setcap CAP_NET_BIND_SERVICE=+eip /usr/sbin/nginx 2>>/dev/null || :
