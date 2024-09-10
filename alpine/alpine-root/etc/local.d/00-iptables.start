@@ -1,0 +1,79 @@
+#!/bin/sh
+
+set -x
+
+NET_IFACE=$(grep '^auto e' /etc/network/interfaces | awk '{print $2}' | head -n1)
+LOCAL_BANLIST="/var/tmp/local-banlist.txt"
+
+iptables -F
+iptables -X
+ip6tables -F
+ip6tables -X
+
+iptables -A INPUT -p icmp -j ACCEPT
+ip6tables -A INPUT -p icmpv6 -j ACCEPT
+
+[ -f /usr/sbin/sshd ] && {
+  SSH_PORT=$(sshport.sh)
+  for i in $(cat /etc/ssh/allowlist.txt) ; do
+    iptables -A INPUT -i "${NET_IFACE}" -p tcp -s "$i" --dport "${SSH_PORT}" -j ACCEPT # allow list
+  done
+  #iptables -A INPUT -p tcp --dport "${SSH_PORT}" -j ACCEPT # allow connections to ssh from all non-banned IPs
+}
+
+[ -f /usr/sbin/nginx ] && {
+  for i in 80 443 ; do
+    iptables -A INPUT -p tcp --dport "$i" -j ACCEPT
+    ip6tables -A INPUT -p tcp --dport "$i" -j ACCEPT
+  done
+}
+
+[ -f /usr/bin/tor ] && {
+  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8118:9050 --sport 1:65000
+  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8118:9050
+  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tor
+}
+
+[ -f /usr/bin/tinyproxy ] && {
+  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
+  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
+  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
+}
+
+[ -f /usr/sbin/i2pd ] && {
+  I2P_UDP=$(i2pdport.sh)
+  iptables -A OUTPUT -j ACCEPT -m owner --uid-owner i2pd
+  iptables -A INPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
+  iptables -A OUTPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
+  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 7070:4444 --sport 1:65000
+  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 7070:4444
+  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner i2pd
+}
+
+# for ISPs that block traffic to standard DNS port
+iptables -t nat -A OUTPUT -p tcp -d 9.9.9.9 --dport 53 -j DNAT --to-destination 9.9.9.9:9953
+iptables -t nat -A OUTPUT -p udp -d 9.9.9.9 --dport 53 -j DNAT --to-destination 9.9.9.9:9953
+iptables -t nat -A OUTPUT -p tcp -d 9.9.9.11 --dport 53 -j DNAT --to-destination 9.9.9.11:9953
+iptables -t nat -A OUTPUT -p udp -d 9.9.9.11 --dport 53 -j DNAT --to-destination 9.9.9.11:9953
+
+[ -f /usr/bin/tinyproxy ] && {
+  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
+  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
+  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
+}
+
+[ -f "${LOCAL_BANLIST}" ] && {
+  for i in $(cat "${LOCAL_BANLIST}") ; do
+    iptables -A INPUT -s "$i" -j DROP || ip6tables -A INPUT -s "$i" -j DROP
+  done
+}
+
+# disallow all incoming connections by default
+iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i "${NET_IFACE}" -j DROP
+ip6tables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+ip6tables -A INPUT -i "${NET_IFACE}" -j DROP

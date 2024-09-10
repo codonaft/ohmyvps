@@ -1,0 +1,10 @@
+/var/log/messages {
+    delaycompress
+    missingok
+    sharedscripts
+    #su root root
+    #create 0644 root root
+    postrotate
+        /etc/init.d/syslog-ng reload > /dev/null 2>&1 || true
+    endscript
+}
