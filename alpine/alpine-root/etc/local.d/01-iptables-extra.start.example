@@ -22,15 +22,15 @@ done
 #  ip6tables -A INPUT -p tcp --dport "${SSH_PORT}" -j ACCEPT
 #}
 
-## allow HTTP/HTTPS traffic from all IPs
-#[ -f /usr/sbin/nginx ] && {
-#  for p in 80 443 ; do
-#    iptables -A INPUT -p tcp --dport "$p" -j ACCEPT
-#    ip6tables -A INPUT -p tcp --dport "$p" -j ACCEPT
-#  done
-#  iptables -A INPUT -p udp --dport 443 -j ACCEPT
-#  ip6tables -A INPUT -p udp --dport 443 -j ACCEPT
-#}
+# allow HTTP/HTTPS traffic from all IPs
+[ -f /usr/sbin/nginx ] && {
+  for p in 80 443 ; do
+    iptables -A INPUT -p tcp --dport "$p" -j ACCEPT
+    ip6tables -A INPUT -p tcp --dport "$p" -j ACCEPT
+  done
+  iptables -A INPUT -p udp --dport 443 -j ACCEPT
+  ip6tables -A INPUT -p udp --dport 443 -j ACCEPT
+}
 
 # allow HTTP/HTTPS traffic from Cloudflare IPs
 {
