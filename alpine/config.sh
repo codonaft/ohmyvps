@@ -1,5 +1,3 @@
-export ALPINE_VERSION='3.20'
-
 export TARGET_DISK='/dev/sda'
 
 export FORMAT_DISK='1' # NOTE: 1 will create dos partition table with a single ext4 partition
@@ -53,6 +51,7 @@ export WORLD_PACKAGES=(
   #tor
   util-linux
   vim
+  yq
   zsh
   zsh-vcs
 )

@@ -48,7 +48,7 @@ umount -l /mnt || :
 vim config.sh
 source config.sh
 
-setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/{main,community} || :
+setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
 
 echo "${ANSWERS}" > .answers.conf
 echo "USEROPTS='none'" >> .answers.conf
