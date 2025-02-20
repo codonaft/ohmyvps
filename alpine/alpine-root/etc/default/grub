@@ -2,3 +2,4 @@ GRUB_DISTRIBUTOR="Alpine"
 GRUB_TIMEOUT=1
 GRUB_DISABLE_SUBMENU=true
 GRUB_DISABLE_RECOVERY=true
+GRUB_CMDLINE_LINUX_DEFAULT=" ro modules=sd-mod,usb-storage,ext4 rootfstype=ext4 random.trust_cpu=off"

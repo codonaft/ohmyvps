@@ -89,8 +89,8 @@ if [ "$(id -u)" != "0" ] ; then
 fi
 
 NET_IFACE=$(ip route | grep default | awk '{print $5}')
-which apk && setup-apkrepos -1 && sed --in-place "/^\/.*/d;s!^#http!http!;s!^http:!https:!" /etc/apk/repositories && apk add bash gnupg htop iptables rsync tmux vim wget
-which apt && apt -y install bash gnupg htop iptables rsync tmux vim wget
+which apk && setup-apkrepos -1 && sed --in-place "/^\/.*/d;s!^#http!http!;s!^http:!https:!" /etc/apk/repositories && apk add bash gnupg htop iptables rsync tmux vim wget yq
+which apt && apt -y install bash gnupg htop iptables rsync tmux vim wget yq
 
 echo 'applying firewall rules'
 iptables -F
@@ -123,13 +123,15 @@ case "${os}" in
         ;;
     "Boot Alpine Linux")
         ARCH='x86_64'
-        DEFAULT_VERSION='3.20.3'
         MIRROR="https://dl-cdn.alpinelinux.org/alpine"
+        VERSION_REQUEST='.[] | select(.title == "Virtual") | .version'
+
+        default_version=$(wget -qO - "${MIRROR}/latest-stable/releases/${ARCH}/latest-releases.yaml" | yq --output-format props "${VERSION_REQUEST}" || yq --raw-output "${VERSION_REQUEST}" || echo '3.21.3')
 
         echo
-        read -p "Version? [${DEFAULT_VERSION}] " version
+        read -p "Version? [${default_version}] " version
         echo
-        version=${version:-${DEFAULT_VERSION}}
+        version=${version:-${default_version}}
         short_version=$(echo ${version} | sed 's!\.[0-9]*$!!')
 
         set -x
