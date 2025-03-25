@@ -43,12 +43,14 @@ export WORLD_PACKAGES=(
   #nginx
   #nginx-mod-http-brotli
   podman
+  py3-psutil
   rsync
   rtorrent
   sudo
   #tinyproxy
   tmux
   #tor
+  tshark
   util-linux
   vim
   yq
