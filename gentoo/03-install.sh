@@ -24,20 +24,20 @@
 
 set -xeuo pipefail
 
-function umount_root_partition_recursively() {
+umount_root_partition_recursively() {
   umount --lazy /mnt/gentoo/dev{/shm,/pts,} || :
   umount --recursive /mnt/gentoo || :
   umount /mnt/gentoo || :
 }
 
-function enable_log() {
+enable_log() {
   touch "$1"
   chown root:root "$1"
   chmod 600 "$1"
   exec &> >(tee -a >(sed "s/^/$(date +'%Y-%m-%d %H:%M:%S') /" >> "$1"))
 }
 
-function log() {
+log() {
   logger "ohmyvps: $1"
 }
 

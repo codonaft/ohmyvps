@@ -3,15 +3,15 @@
 PATH_PREFIX="/var/tmp/cloudflare-ipv"
 NGINX_CONF="/etc/nginx/cloudflare.conf"
 
-load () {
+load() {
   cat ${PATH_PREFIX}{4,6}.txt 2>>/dev/null
 }
 
-sum () {
+sum() {
   load | sha256sum
 }
 
-download () {
+download() {
   version="$1"
   cidr="$2"
   output="${PATH_PREFIX}${version}.txt"

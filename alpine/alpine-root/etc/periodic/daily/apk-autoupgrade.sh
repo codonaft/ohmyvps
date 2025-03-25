@@ -2,7 +2,7 @@
 
 logger 'apk-autoupgrade'
 
-installed_apk () {
+installed_apk() {
   apk list --installed | grep -E "^$1-[0-9]{1,}" | head -n1 | awk '{print $1}'
 }
 

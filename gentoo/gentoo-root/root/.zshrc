@@ -110,7 +110,7 @@ export PS1='%(!.%B%F{red}.%B%F{green}%n)%F{'${hostname_color}'}@%m %F{blue}%(!.%
 [ -r /var/log/messages ] && grep --text 'emerge updates' $(ls --color=no -1 /var/log/messages* | grep -v 'gz$' | tac) | tail -n1
 
 ## https://superuser.com/questions/585545/how-to-disable-zsh-tab-completion-for-nfs-dirs/586088#586088
-#function restricted-expand-or-complete() {
+#restricted-expand-or-complete() {
 #   # split into shell words also at "=", if IFS is unset use the default (blank, \t, \n, \0)
 #   local IFS="${IFS:- \n\t\0}="
 #

@@ -145,7 +145,7 @@ echo 'generating certificate now'
 sudo su certbot -c "
 set -xeuo pipefail
 
-cb () {
+cb() {
   certbot \$1 \
     --server ${server} \
     --noninteractive --agree-tos --preferred-challenges http-01 --force-renewal --key-type ecdsa \

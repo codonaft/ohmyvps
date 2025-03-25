@@ -93,7 +93,7 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
   syslog-ng
 )
 
-function maybe_install_oh_my_zsh() {
+maybe_install_oh_my_zsh() {
   which zsh && {
     oh_my_zsh_install="https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
     highlighting="git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
@@ -102,7 +102,7 @@ function maybe_install_oh_my_zsh() {
   }
 }
 
-function pre_emerge_packages() {
+pre_emerge_packages() {
   # Run any commands before emerging system/world packages and before user creation, for instance:
   eselect repository add alopatindev-overlay git https://github.com/alopatindev/gentoo-overlay-alopatindev
   emaint sync -r alopatindev-overlay
@@ -110,7 +110,7 @@ function pre_emerge_packages() {
   emerge --nodeps --oneshot dev-libs/openssl::alopatindev-overlay # disable rdrand
 }
 
-function post_emerge_packages() {
+post_emerge_packages() {
   mkdir -p /coredumps
   chmod 700 /coredumps
 
@@ -148,7 +148,7 @@ function post_emerge_packages() {
 }
 
 # this will run as USERNAME
-function post_emerge_packages_user() {
+post_emerge_packages_user() {
   git config --global user.name "${USERNAME}"
   git config --global user.email "${USERNAME}@${VPS_HOSTNAME}"
   maybe_install_oh_my_zsh

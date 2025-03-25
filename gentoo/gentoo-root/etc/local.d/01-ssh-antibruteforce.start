@@ -10,7 +10,7 @@
     touch "${ALLOWLIST}" "${BANLIST}"
     chmod 600 "${ALLOWLIST}" "${BANLIST}"
 
-    function ban() {
+    ban() {
         ip="$1"
         iptables -I INPUT -p tcp --source "${ip}" --dport "${SSH_PORT}" -j DROP
     }
