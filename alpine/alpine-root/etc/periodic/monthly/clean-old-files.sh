@@ -8,6 +8,7 @@ for i in podman docker ; do
     $i volume prune --force
     $i network prune --force
     $i builder prune --force
+    #$i rmi --all --force
   }
 done
 

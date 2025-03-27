@@ -3,6 +3,14 @@
 NET_IFACE=$(netiface.sh)
 ALLOWLIST="/etc/ssh/allowlist.txt"
 
+## allow DHCP
+#iptables -A INPUT -p udp --dport 68 -j ACCEPT
+#ip6tables -A INPUT -p udp --dport 546 -j ACCEPT
+
+# ratelimit ICMP
+iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 6/s -j ACCEPT
+ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 6/s -j ACCEPT
+
 iptables -A INPUT -i "${NET_IFACE}" -p icmp -s '66.220.2.74' -j ACCEPT # HE
 
 for i in $(grepcidr -e '0.0.0.0/0' < "${ALLOWLIST}") ; do
@@ -18,18 +26,19 @@ done
 
 ## allow connections to ssh from all non-banned IPs
 #[ -f /usr/sbin/sshd ] && {
-#  iptables -A INPUT -p tcp --dport "${SSH_PORT}" -j ACCEPT
-#  ip6tables -A INPUT -p tcp --dport "${SSH_PORT}" -j ACCEPT
+#  for i in iptables ip6tables ; do
+#    "$i" -A INPUT -p tcp --dport "${SSH_PORT}" -j ACCEPT
+#  done
 #}
 
 # allow HTTP/HTTPS traffic from all IPs
 [ -f /usr/sbin/nginx ] && {
-  for p in 80 443 ; do
-    iptables -A INPUT -p tcp --dport "$p" -j ACCEPT
-    ip6tables -A INPUT -p tcp --dport "$p" -j ACCEPT
+  for ipt in iptables ip6tables ; do
+    for p in 80 443 ; do
+      "${ipt}" -A INPUT -p tcp --dport "$p" -j ACCEPT
+    done
+    "${ipt}" -A INPUT -p udp --dport 443 -j ACCEPT
   done
-  iptables -A INPUT -p udp --dport 443 -j ACCEPT
-  ip6tables -A INPUT -p udp --dport 443 -j ACCEPT
 }
 
 # allow HTTP/HTTPS traffic from Cloudflare IPs
@@ -58,34 +67,33 @@ done
 } &
 
 [ -f /usr/bin/tor ] && {
-  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8118:9050 --sport 1:65000
-  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8118:9050
-  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
-  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tor
-}
-
-[ -f /usr/bin/tinyproxy ] && {
-  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
-  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
-  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
-  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
+  for ipt in iptables ip6tables ; do
+    "${ipt}" -I INPUT -j ACCEPT -i lo -p tcp --dport 8118:9050 --sport 1:65000
+    "${ipt}" -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8118:9050
+    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tor
+  done
 }
 
 [ -f /usr/sbin/i2pd ] && {
-  iptables -A OUTPUT -j ACCEPT -m owner --uid-owner i2pd
-  #iptables -A INPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
-  #iptables -A OUTPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
-  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 7070:4444 --sport 1:65000
-  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 7070:4444
-  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
-  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner i2pd
+  for ipt in iptables ip6tables ; do
+    "${ipt}" -A OUTPUT -j ACCEPT -m owner --uid-owner i2pd
+    # "${ipt}" -A INPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
+    # "${ipt}" -A OUTPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
+    "${ipt}" -I INPUT -j ACCEPT -i lo -p tcp --dport 7070:4444 --sport 1:65000
+    "${ipt}" -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 7070:4444
+    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner i2pd
+  done
 }
 
 [ -f /usr/bin/tinyproxy ] && {
-  iptables -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
-  iptables -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
-  iptables -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
-  iptables -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
+  for ipt in iptables ip6tables ; do
+    "${ipt}" -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
+    "${ipt}" -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
+    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
+    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
+  done
 }
 
 wait

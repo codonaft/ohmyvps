@@ -84,6 +84,12 @@ apk add sfdisk sgdisk e2fsprogs
   echo 3 > /proc/sys/vm/drop_caches
 }
 
+# TODO: another disk
+# parted /dev/sdb
+# mklabel gpt
+# mkpart primary ext4 0% 100%
+# quit
+
 mount -t ext4 -o "${MOUNT_OPTS}" "${root_partition}" /mnt
 /etc/init.d/networking stop || :
 setup-alpine -e -f .answers.conf
