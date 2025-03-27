@@ -16,9 +16,11 @@ export USER_SHELL='/bin/zsh'
 export USER_SSH_KEY='https://github.com/username.keys'
 #export USER_SSH_KEY='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOIiHcbg/7ytfLFHUNLRgEAubFz/13SwXBOM/05GNZe4 juser@example.com'
 
+# NOTE: perhaps your default IPv6 gateway should be there as well
 export SSH_ALLOWED_IPS=(
   #1.2.3.4
   #5.6.7.0/24
+  #2001:db8:3333:4444:5555:6666:7777:8888
 )
 
 export WORLD_PACKAGES=(
@@ -33,8 +35,8 @@ export WORLD_PACKAGES=(
   grepcidr3
   htop
   #i2pd
-  iperf3
   inotify-tools
+  iperf3
   iproute2
   #jless
   jq

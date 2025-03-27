@@ -126,7 +126,10 @@ case "${os}" in
         MIRROR="https://dl-cdn.alpinelinux.org/alpine"
         VERSION_REQUEST='.[] | select(.title == "Virtual") | .version'
 
-        default_version=$(wget -qO - "${MIRROR}/latest-stable/releases/${ARCH}/latest-releases.yaml" | yq --output-format props "${VERSION_REQUEST}" || yq --raw-output "${VERSION_REQUEST}" || echo '3.21.3')
+        latest_releases=$(wget -qO - "${MIRROR}/latest-stable/releases/${ARCH}/latest-releases.yaml")
+        default_version=$(yq --output-format props "${VERSION_REQUEST}" <<< "${latest_releases}")
+        [ "${default_version}" = '' ] && default_version=$(yq --raw-output "${VERSION_REQUEST}" <<< "${latest_releases}")
+        [ "${default_version}" = '' ] && default_version='3.21.3'
 
         echo
         read -p "Version? [${default_version}] " version

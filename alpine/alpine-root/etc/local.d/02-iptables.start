@@ -24,13 +24,25 @@ LOCAL_BANLIST="/var/tmp/local-banlist.txt"
 }
 
 # for ISPs that block traffic to standard DNS port
-iptables -t nat -A OUTPUT -p tcp -d 9.9.9.9 --dport 53 -j DNAT --to-destination 9.9.9.9:9953
-iptables -t nat -A OUTPUT -p udp -d 9.9.9.9 --dport 53 -j DNAT --to-destination 9.9.9.9:9953
-iptables -t nat -A OUTPUT -p tcp -d 9.9.9.11 --dport 53 -j DNAT --to-destination 9.9.9.11:9953
-iptables -t nat -A OUTPUT -p udp -d 9.9.9.11 --dport 53 -j DNAT --to-destination 9.9.9.11:9953
+for i in 9.9.9.9 149.112.112.112 9.9.9.11 149.112.112.11 9.9.9.10 149.112.112.10 ; do
+  iptables -t nat -A OUTPUT -p tcp -d "$i" --dport 53 -j DNAT --to-destination "$i:9953"
+  iptables -t nat -A OUTPUT -p udp -d "$i" --dport 53 -j DNAT --to-destination "$i:9953"
+done
+for i in 2620:fe::fe 2620:fe::9 2620:fe::11 2620:fe::fe:11 2620:fe::10 2620:fe::fe:10 ; do
+  ip6tables -t nat -A OUTPUT -p tcp -d "$i" --dport 53 -j DNAT --to-destination "$i:9953"
+  ip6tables -t nat -A OUTPUT -p udp -d "$i" --dport 53 -j DNAT --to-destination "$i:9953"
+done
 
-# disallow all incoming connections by default
-iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -i "${NET_IFACE}" -j DROP
-ip6tables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-ip6tables -A INPUT -i "${NET_IFACE}" -j DROP
+for ipt in iptables ip6tables ; do
+  "${ipt}" -A INPUT --in-interface lo -j ACCEPT
+
+  # make sure NEW incoming tcp connections are SYN packets
+  "${ipt}" -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
+  "${ipt}" -A INPUT -m conntrack --ctstate INVALID -j DROP
+
+  # don't touch established connections
+  "${ipt}" -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+  # disallow all incoming connections by default
+  "${ipt}" -A INPUT -i "${NET_IFACE}" -j DROP
+done
