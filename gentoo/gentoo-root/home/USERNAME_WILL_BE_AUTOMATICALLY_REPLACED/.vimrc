@@ -12,6 +12,7 @@ set nocompatible
 set ruler
 set showcmd
 set nu
+set relativenumber
 set incsearch
 set nohlsearch
 set scrolljump=4
@@ -253,14 +254,14 @@ hi Statement term=bold cterm=bold gui=bold
 hi Type ctermfg=4 cterm=bold
 hi String ctermfg=5 cterm=bold
 hi Comment ctermfg=6 cterm=bold
-hi LineNr ctermfg=3 cterm=bold
+hi LineNr ctermfg=242
 hi Search ctermfg=0
 hi Constant cterm=bold
 hi StatusLineNC cterm=bold ctermfg=0
 hi Title ctermfg=LightBlue ctermbg=Magenta
 hi PreProc cterm=bold ctermfg=4
 hi CursorLineNr ctermfg=Yellow
-set cursorline
+"set cursorline " underline current line
 hi Folded ctermfg=darkgreen ctermbg=black
 hi Visual ctermbg=darkblue term=bold
 hi StatusLine ctermfg=white ctermbg=darkblue cterm=none
