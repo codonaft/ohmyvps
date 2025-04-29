@@ -28,3 +28,4 @@ ROOT_PARTITION_WILL_BE_AUTOMATICALLY_REPLACED / ext4 noatime,nodiratime,discard,
 /dev/vda2 none swap sw 0 0
 #LABEL=swap		none		swap		sw		0 0
 #/dev/cdrom		/mnt/cdrom	auto		noauto,ro	0 0
+proc /proc proc defaults,hidepid=invisible 0 0

@@ -170,10 +170,11 @@ su - "${USERNAME}" -c '$(declare -f maybe_install_oh_my_zsh) ; maybe_install_oh_
 [ -e /root/.zshrc.pre-oh-my-zsh ] && mv -fv /root/.zshrc{.pre-oh-my-zsh,}
 [ -e /home/${USERNAME}/.zshrc.pre-oh-my-zsh ] && mv -fv /home/${USERNAME}/.zshrc{.pre-oh-my-zsh,}
 
-echo 'add temp mount points'
+echo 'update mount points'
 mkdir -p -m 00000 /root/tmp /home/${USERNAME}/tmp
 echo 'tmpfs /root/tmp tmpfs nosuid,nodev,mode=1700,uid=0,gid=0,size=128M 0 0' >> /etc/fstab
 echo 'tmpfs /home/${USERNAME}/tmp tmpfs nosuid,nodev,mode=1700,uid=1000,gid=1000,size=128M 0 0' >> /etc/fstab
+echo 'proc /proc proc defaults,hidepid=invisible 0 0' >> /etc/fstab
 
 [ -e /usr/sbin/nginx ] && {
   touch /var/lib/nginx/logs/{access,error}.log
