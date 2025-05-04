@@ -1,8 +1,15 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+
+allowed_services=$(echo 'hostname syslog' ; rc-update show default | sed 's! *!!;s! | .*$!!')
 
 inotifywait --event close_write,moved_to,create --monitor --recursive /etc/local.d/ |
   while read -r directory events filename ; do
     rc-service --ifstarted local restart 2>>/dev/stdout | logger
+  done &
+
+inotifywait --event close_write,moved_to,create --monitor --recursive /etc/conf.d/ |
+  while read -r directory events filename ; do
+    [ -f "/etc/init.d/${filename}" ] && grep --extended-regexp '(^| )'${filename}'($| )' <<< "${allowed_services}" >>/dev/null && ( rc-service --ifstarted "${filename}" reload || rc-service --ifstarted "${filename}" restart ) 2>>/dev/stdout | logger
   done &
 
 [ -f /etc/init.d/i2pd ] && inotifywait --event close_write,moved_to,create --monitor --recursive /etc/i2pd/ |
