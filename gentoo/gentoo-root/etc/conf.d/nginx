@@ -34,3 +34,6 @@
 # Run master process as user
 command_user="${NGINX_USER:-nginx}"
 setcap CAP_NET_BIND_SERVICE=+eip /usr/sbin/nginx 2>>/dev/null || :
+
+mkdir -m 00700 -p /var/cache/nginx 2>>/dev/null || :
+chown nginx:nginx /var/cache/nginx 2>>/dev/null || :
