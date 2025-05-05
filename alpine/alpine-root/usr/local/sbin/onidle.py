@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from datetime import datetime, timedelta, UTC
-from os import path
-from subprocess import getoutput
+from os import getuid, path
+from subprocess import getoutput, getstatusoutput
 from time import sleep
 import psutil
 import sys
@@ -26,6 +26,14 @@ def info(message):
     if message not in PRINTED_MESSAGES:
         PRINTED_MESSAGES.add(message)
         print(PRE_MESSAGE, message)
+
+def is_nginx_config_valid():
+    if getuid() == 0:
+        exit_code, _ = getstatusoutput('/etc/init.d/nginx checkconfig')
+        return exit_code == 0
+    else:
+        info('non-root cannot check nginx config')
+        return True
 
 def is_nginx_active():
     try:
@@ -68,6 +76,10 @@ while True:
     detected_processes = CRITIAL_PROCESSES.intersection(i.info['name'] for i in psutil.process_iter(['name']))
     if len(detected_processes) > 0:
         info('detected critical processes', detected_processes)
+        continue
+
+    if not is_nginx_config_valid():
+        info('nginx config is not valid')
         continue
 
     if is_nginx_active():
