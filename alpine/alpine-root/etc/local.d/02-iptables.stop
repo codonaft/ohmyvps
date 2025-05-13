@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 iptables -P INPUT ACCEPT
 iptables -P FORWARD ACCEPT

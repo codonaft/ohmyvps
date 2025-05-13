@@ -3,7 +3,8 @@
 set -euo pipefail
 #set -x
 
-WHEEL_UID='1000'
+source /etc/profile.d/99local.sh
+
 [ "$(id -u)" == "${WHEEL_UID}" ] || {
   echo 'unexpected user'
   exit 1

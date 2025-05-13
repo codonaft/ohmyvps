@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 busybox ip -6 route flush dev || :
 for i in netassist ip4market he ; do

@@ -24,8 +24,7 @@
 
 set -xeuo pipefail
 
-WHEEL_UID='1000'
-ADMIN_GROUP='wheel'
+source /etc/profile.d/99local.sh
 
 WEBROOT_PATH='/var/www/certbot'
 NGINX_CONF_DIR='/etc/nginx/locations'

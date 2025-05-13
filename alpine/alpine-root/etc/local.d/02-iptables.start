@@ -1,8 +1,4 @@
-#!/bin/sh
-
-NET_IFACE=$(netiface.sh)
-ALLOWLIST="/etc/ssh/allowlist.txt"
-LOCAL_BANLIST="/var/tmp/local-banlist.txt"
+#!/usr/bin/env sh
 
 [ -f "${LOCAL_BANLIST}" ] && {
   for i in $(grepcidr -e '0.0.0.0/0' < "${LOCAL_BANLIST}") ; do
@@ -11,14 +7,13 @@ LOCAL_BANLIST="/var/tmp/local-banlist.txt"
   for i in $(grepcidr -e '::/0' < "${LOCAL_BANLIST}") ; do
     ip6tables -A INPUT -s "$i" -j DROP
   done
-}
+} || touch "${LOCAL_BANLIST}"
 
 [ -f /usr/sbin/sshd ] && {
-  SSH_PORT=$(sshport.sh)
-  for i in $(grepcidr -e '0.0.0.0/0' < "${ALLOWLIST}") ; do
+  for i in $(grepcidr -e '0.0.0.0/0' < "${SSH_ALLOWLIST}") ; do
     iptables -A INPUT -i "${NET_IFACE}" -p tcp -s "$i" --dport "${SSH_PORT}" -j ACCEPT
   done
-  for i in $(grepcidr -e '::/0' < "${ALLOWLIST}") ; do
+  for i in $(grepcidr -e '::/0' < "${SSH_ALLOWLIST}") ; do
     ip6tables -A INPUT -i "${NET_IFACE}" -p tcp -s "$i" --dport "${SSH_PORT}" -j ACCEPT
   done
 }

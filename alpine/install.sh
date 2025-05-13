@@ -226,6 +226,9 @@ cd /
 chattr +i /etc/update-extlinux.conf
 [ -e /etc/conf.d/nginx ] && chattr +i /etc/conf.d/nginx
 
+echo 'source /etc/profile.d/99local.sh' > /etc/conf.d/local
+chattr +i /etc/conf.d/local
+
 sync
 echo 3 > /proc/sys/vm/drop_caches
 cat /etc/alpine-release || :

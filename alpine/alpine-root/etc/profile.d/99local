@@ -1,9 +1,0 @@
-RUSTFLAGS="-C target-cpu=native -C force-frame-pointers=y"
-CFLAGS="-O2 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
-CXXFLAGS="-O2 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
-FCFLAGS="-O2 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
-FFLAGS="-O2 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
-LDFLAGS="-Wl,-z,now -Wl,-z,relro"
-#MAKEOPTS="-j16 -l16"
-
-EDITOR="vim"

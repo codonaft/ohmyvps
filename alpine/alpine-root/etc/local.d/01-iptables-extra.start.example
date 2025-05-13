@@ -1,7 +1,4 @@
-#!/bin/sh
-
-NET_IFACE=$(netiface.sh)
-ALLOWLIST="/etc/ssh/allowlist.txt"
+#!/usr/bin/env sh
 
 ## allow DHCP
 #iptables -A INPUT -p udp --dport 68 -j ACCEPT
@@ -13,10 +10,10 @@ ip6tables -A INPUT -p icmpv6 --icmpv6-type echo-request -m limit --limit 6/s -j 
 
 iptables -A INPUT -i "${NET_IFACE}" -p icmp -s '66.220.2.74' -j ACCEPT # HE
 
-for i in $(grepcidr -e '0.0.0.0/0' < "${ALLOWLIST}") ; do
+for i in $(grepcidr -e '0.0.0.0/0' < "${SSH_ALLOWLIST}") ; do
   iptables -A INPUT -p icmp -s "$i" -j ACCEPT
 done
-for i in $(grepcidr -e '::/0' < "${ALLOWLIST}") ; do
+for i in $(grepcidr -e '::/0' < "${SSH_ALLOWLIST}") ; do
   ip6tables -A INPUT -p icmpv6 -s "$i" -j ACCEPT
 done
 

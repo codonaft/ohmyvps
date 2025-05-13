@@ -3,20 +3,16 @@
 # I wish fail2ban stopped breaking things and old configs would just keep working for ages =/
 
 (
-  SSH_PORT=$(sshport.sh)
-
-  ALLOWLIST="/etc/ssh/allowlist.txt"
-  BANLIST="/etc/ssh/banlist.txt"
-  touch "${ALLOWLIST}" "${BANLIST}"
-  chmod 600 "${ALLOWLIST}" "${BANLIST}"
+  touch "${SSH_ALLOWLIST}" "${SSH_BANLIST}"
+  chmod 600 "${SSH_ALLOWLIST}" "${SSH_BANLIST}"
 
   ban() {
     ip="$1"
     iptables -I INPUT -p tcp --source "${ip}" --dport "${SSH_PORT}" -j DROP
   }
 
-  if [ -e "${BANLIST}" ] ; then
-    for ip in $(cat "${BANLIST}") ; do
+  if [ -e "${SSH_BANLIST}" ] ; then
+    for ip in $(cat "${SSH_BANLIST}") ; do
       ban "${ip}"
     done
   fi
@@ -25,9 +21,9 @@
     grep --line-buffered --extended-regexp 'sshd\[[0-9]*\]: (Connection closed by (invalid|authenticating) user.*\[preauth\]|Invalid user .* from .*)' | \
     grep --extended-regexp --line-buffered --only-matching '([0-9]{1,3}\.){3}[0-9]{1,3}' | \
     while IFS=$'\n\t' read ip ; do
-      echo "${ip}" | grepcidr $(paste -sd ',' < "${ALLOWLIST}") >>/dev/null && logger "ignoring allowed IP ${ip}" || {
+      echo "${ip}" | grepcidr $(paste -sd ',' < "${SSH_ALLOWLIST}") >>/dev/null && logger "ignoring allowed IP ${ip}" || {
         logger "banning IP ${ip}"
-        echo "${ip}" >> "${BANLIST}"
+        echo "${ip}" >> "${SSH_BANLIST}"
         ban "${ip}"
       }
     done

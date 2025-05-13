@@ -10,6 +10,8 @@ APKS=(
   tor
 )
 
+source /etc/profile.d/99local.sh
+
 declare -Ag version_signatures
 declare -Ag services
 

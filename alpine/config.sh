@@ -42,8 +42,8 @@ export WORLD_PACKAGES=(
   jq
   mtr
   ncdu
-  #nginx
   #nginx-mod-http-brotli
+  #nginx
   podman
   py3-psutil
   rsync

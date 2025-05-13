@@ -30,6 +30,7 @@ inotifywait --event close_write,moved_to,create --monitor --recursive /etc/conf.
   while read -r directory events filename ; do
     if [[ "${filename}" == *".conf" || "${filename}" == "sshd_config" ]] ; then
       rc-service --ifstarted sshd reload 2>>/dev/stdout | logger
+      rc-service --ifstarted local restart 2>>/dev/stdout | logger
     fi
   done &
 

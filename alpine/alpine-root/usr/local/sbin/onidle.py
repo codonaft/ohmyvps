@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from datetime import datetime, timedelta, UTC
-from os import getuid, path
+from os import environ, getuid, path
 from subprocess import getoutput, getstatusoutput
 from time import sleep
 import psutil
@@ -9,11 +9,12 @@ import sys
 
 TIMEOUT = timedelta(hours=2)
 NGINX_MIN_DELTA_ACCESS = timedelta(minutes=1)
-MAX_ALLOWLIST_BANDWIDTH_BYTES_PER_SEC = 50 * 1024
+BANDWIDTH_DELTA_TIME = timedelta(seconds=10)
+MAX_SSH_ALLOWLIST_BANDWIDTH_BYTES_PER_SEC = 50 * 1024
 CRITIAL_PROCESSES = {'apk', 'fstrim', 'rsync'}
 
-BANDWIDTH_DELTA_TIME_SEC = 10
-ALLOWLIST = '/etc/ssh/allowlist.txt'
+SSH_ALLOWLIST = environ['SSH_ALLOWLIST']
+NET_IFACE = environ['NET_IFACE']
 
 PRE_MESSAGE = path.splitext(path.basename(sys.argv[0]))[0] + ':'
 PRINTED_MESSAGES = set()
@@ -49,10 +50,11 @@ def is_nginx_active():
 
 def bandwidth():
     try:
-        nets = (net for net in open(ALLOWLIST).readlines() if len(net.strip()) > 0)
+        nets = (net for net in open(SSH_ALLOWLIST).readlines() if len(net.strip()) > 0)
         pattern = ' or '.join(f'net {net}' for net in nets)
-        tshark = getoutput(f'timeout {BANDWIDTH_DELTA_TIME_SEC}s tshark -i $(netiface.sh) -f "({pattern}) and (tcp or udp)" -T fields -e frame.len 2>>/dev/null').split('\n')
-        return sum(int(i) for i in tshark if len(i) > 0) // BANDWIDTH_DELTA_TIME_SEC
+        timeout_secs = BANDWIDTH_DELTA_TIME.seconds
+        tshark = getoutput(f'timeout {timeout_secs}s tshark -i {NET_IFACE} -f "({pattern}) and (tcp or udp)" -T fields -e frame.len 2>>/dev/null').split('\n')
+        return sum(int(i) for i in tshark if len(i) > 0) // timeout_secs
     except Exception as e:
         info(e)
         return 0
@@ -87,7 +89,7 @@ while True:
         continue
 
     allowlist_bandwidth = bandwidth()
-    if allowlist_bandwidth > MAX_ALLOWLIST_BANDWIDTH_BYTES_PER_SEC:
+    if allowlist_bandwidth > MAX_SSH_ALLOWLIST_BANDWIDTH_BYTES_PER_SEC:
         info(f'detected allowlist activity {allowlist_bandwidth // 1024} KiB/s')
         continue
 

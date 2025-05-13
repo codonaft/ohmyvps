@@ -63,7 +63,7 @@ set spelllang=en,ru
 "map <S-s> :set spell!<Enter>
 map <F7> :set spell!<Enter>
 imap <F7> <esc>:set spell!<Enter>
-map <A-n> :set nu!<Enter>
+map <C-n> :set relativenumber!<Enter>:set nu!<Enter>
 
 " allow to use backspace instead of "x"
 set backspace=indent,eol,start whichwrap+=<,>,[,]
