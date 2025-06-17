@@ -40,6 +40,10 @@ apk upgrade --no-cache 2>>/dev/stdout | logger
 apk del doas linux-lts openssh-server-pam syslinux tiny-cloud-alpine tiny-cloud || :
 rm -f /etc/motd
 
+for i in $(grep ':/bin/zsh$' /etc/passwd | cut -d ':' -f1) ; do
+  su "$i" -c 'source ~/.zshrc && echo | omz update' 2>>/dev/stdout | logger || :
+done
+
 sync
 echo 3 > /proc/sys/vm/drop_caches
 for i in $(grep -E '^/dev' < /proc/mounts | awk '{print $2}') ; do
