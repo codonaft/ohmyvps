@@ -2,9 +2,9 @@
 
 ## Installation
 
-### 1. Login to your VPS control panel, go to remote access/VNC page.
+### 1. Login to your VPS control panel → go to remote access/VNC page.
 
-### 2. Boot VPS instance from Alpine Linux `.iso`, configure network:
+### 2. Boot VPS instance from Alpine Linux `.iso` → configure network:
 
 ```bash
 setup-interfaces
@@ -27,7 +27,7 @@ or
 sh -c "$(wget -O - https://omv.codonaft.com)"
 ```
 
-Choose `2`, login as `root`, configure network again.
+Choose `2` → login as `root` → configure network again.
 
 ### 3. Install
 ```bash

@@ -142,11 +142,11 @@ case "${os}" in
         iso="alpine-virt-${version}-${ARCH}.iso"
         url="${MIRROR}/v${short_version}/releases/${ARCH}/${iso}"
 
-        wget -c "${url}" "${url}.sha256" "${url}.asc"
+        wget -c "${url}"{,.sha256,.asc}
         sha256sum -c "${iso}.sha256"
 
         echo "${ALPINE_GPG}" | gpg --import
-        gpg --verify "${iso}.asc" "${iso}"
+        gpg --verify "${iso}"{.asc,}
 
         mount -t iso9660 "${iso}" /mnt
         cp -a /mnt/* / || :
