@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+kill $(ps uax | grep 'tail -n1 -F /var/log/messages' | grep -v grep | awk '{print $2}')

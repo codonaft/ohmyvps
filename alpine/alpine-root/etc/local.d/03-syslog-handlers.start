@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 
-# I wish fail2ban stopped breaking things and old configs would just keep working for ages =/
+(
+  tail -n1 -F /var/log/messages | \
+    grep ': I/O error' | \
+    while IFS=$'\n\t' read line ; do
+      logger 'reboot due to fatal error'
+      reboot
+      break
+    done
+) &
 
+# I wish fail2ban stopped breaking things and old configs would just keep working for ages =/
 (
   touch "${SSH_ALLOWLIST}" "${SSH_BANLIST}"
   chmod 600 "${SSH_ALLOWLIST}" "${SSH_BANLIST}"
