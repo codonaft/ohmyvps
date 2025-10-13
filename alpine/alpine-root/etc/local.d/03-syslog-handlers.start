@@ -1,11 +1,26 @@
 #!/usr/bin/env bash
 
 (
-  tail -n1 -F /var/log/messages | \
+  HARD_REBOOT="/tmp/hard_reboot"
+  [ -e "${HARD_REBOOT}" ] || echo '
+    #include <fcntl.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <unistd.h>
+    #define REBOOT "b"
+    int main() {
+      int fd = open("/proc/sysrq-trigger", O_WRONLY | O_NOCTTY | O_SYNC);
+      if (fd == -1) return 1;
+      if (write(fd, REBOOT, strlen(REBOOT)) != strlen(REBOOT)) return 2;
+      close(fd);
+      return 0;
+    }
+  ' | gcc -static -x c -o "${HARD_REBOOT}" -
+
+  tail -n1 -F /tmp/messages | \
     grep ': I/O error' | \
     while IFS=$'\n\t' read line ; do
-      logger 'reboot due to fatal error'
-      reboot
+      "${HARD_REBOOT}"
       break
     done
 ) &

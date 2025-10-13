@@ -63,6 +63,19 @@ done
   done
 } &
 
+# disallow traffic from Google Cloud
+{
+  [ ! -f /var/tmp/google-cloud-ipv4.txt ] || [ ! -f /var/tmp/google-cloud-ipv6.txt ] && update-google-ips.sh || :
+
+  for i in $(cat /var/tmp/google-cloud-ipv4.txt) ; do
+    iptables -A INPUT -s "$i" -j DROP
+  done
+
+  for i in $(cat /var/tmp/google-cloud-ipv6.txt) ; do
+    ip6tables -A INPUT -s "$i" -j DROP
+  done
+} &
+
 [ -f /usr/bin/tor ] && {
   for ipt in iptables ip6tables ; do
     "${ipt}" -I INPUT -j ACCEPT -i lo -p tcp --dport 8118:9050 --sport 1:65000

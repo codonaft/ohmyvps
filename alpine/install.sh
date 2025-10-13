@@ -119,7 +119,7 @@ set -xeuo pipefail
 
 echo "installing packages"
 apk del doas linux-lts openssh-server-pam syslinux || :
-apk add alpine-sdk bash etckeeper git grep grub grub-bios libcap linux-virt procps python3 shadow ${WORLD_PACKAGES[*]}
+apk add alpine-sdk bash etckeeper git grep grub grub-bios libcap linux-virt musl-dev procps python3 shadow ${WORLD_PACKAGES[*]}
 rm -rf /var/cache/apk/*
 
 #update-extlinux
