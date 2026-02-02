@@ -40,6 +40,7 @@ export WORLD_PACKAGES=(
   iproute2
   #jless
   jq
+  #lyrebird
   mtr
   ncdu
   #nginx-mod-http-brotli

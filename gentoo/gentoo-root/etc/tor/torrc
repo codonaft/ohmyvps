@@ -1,9 +1,12 @@
-#
-# Minimal torrc so tor will work out of the box
-#
 User tor
 PIDFile /run/tor/tor.pid
 Log notice syslog
 DataDirectory /var/lib/tor/data
 ExitRelay 0
 ExcludeExitNodes {am}, {az}, {by}, {ee}, {ge}, {kg}, {kz}, {lt}, {ly}, {md}, {ru}, {tj}, {tm}, {ua}, {uz}
+AvoidDiskWrites 1
+
+#UseBridges 1
+#ClientTransportPlugin obfs4,webtunnel exec /usr/bin/lyrebird
+#ExtORPort auto
+#Bridge obfs4 ...

@@ -11,7 +11,7 @@
 
 ## Installation
 - [Alpine Linux](alpine/README.md)
-- [Gentoo Hardened](gentoo/README.md)
+- [Gentoo Hardened](gentoo/README.md) (not actively maintained at the moment)
 
 ## Support
 I'm currently investing [all my time](https://codonaft.com/why) in personal projects and no longer making any income from proprietary commercial projects owned by third-party businesses.

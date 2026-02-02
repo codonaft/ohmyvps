@@ -1,3 +1,9 @@
 Log notice syslog
 ExitRelay 0
 ExcludeExitNodes {am}, {az}, {by}, {ee}, {ge}, {kg}, {kz}, {lt}, {ly}, {md}, {ru}, {tj}, {tm}, {ua}, {uz}, {ie}
+AvoidDiskWrites 1
+
+#UseBridges 1
+#ClientTransportPlugin obfs4,webtunnel exec /usr/bin/lyrebird
+#ExtORPort auto
+#Bridge obfs4 ...
