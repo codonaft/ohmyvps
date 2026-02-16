@@ -5,3 +5,5 @@ chvt 12
 setterm -blank 0
 setterm -powersave off
 setterm -powerdown 0
+
+update-allowlist-ips.sh || :
