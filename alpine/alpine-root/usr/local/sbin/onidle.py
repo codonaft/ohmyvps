@@ -11,7 +11,7 @@ TIMEOUT = timedelta(hours=2)
 NGINX_MIN_DELTA_ACCESS = timedelta(minutes=1)
 BANDWIDTH_DELTA_TIME = timedelta(seconds=10)
 MAX_SSH_ALLOWLIST_BANDWIDTH_BYTES_PER_SEC = 50 * 1024
-CRITIAL_PROCESSES = {'apk', 'fstrim', 'rsync'}
+CRITIAL_PROCESSES = {'apk', 'fstrim', 'logrotate', 'rsync'}
 
 SSH_ALLOWLIST = environ['SSH_ALLOWLIST']
 NET_IFACE = environ['NET_IFACE']

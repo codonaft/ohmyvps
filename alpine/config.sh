@@ -40,6 +40,7 @@ export WORLD_PACKAGES=(
   iproute2
   #jless
   jq
+  logrotate
   #lyrebird
   mtr
   ncdu

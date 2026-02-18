@@ -14,11 +14,14 @@ done
 
 which flatpak && flatpak uninstall --unused --noninteractive
 
+# keep currently installed packages only
+apk cache -v sync 2>> /dev/stdout | logger
+
 # remove at least 30 days old non-dot files/directories
 find /coredumps/ /home/*/Downloads/ -mindepth 1 -not -path '*/.*' -mtime +30 -exec rm -fr {} +
 
-# keep currently installed packages only
-apk cache -v sync 2>> /dev/stdout | logger
+# remove at least 1y old rotated logs
+find /var/log/ -mindepth 1 -path '*/*.gz' -mtime +365 -exec rm -f {} +
 
 find /root/tmp/.vimundo/ -type f -mtime +90 -delete
 find /root/tmp/.vimswaps/ -type f -mtime +90 -delete
