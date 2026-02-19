@@ -1,0 +1,2 @@
+source /etc/profile.d/99local.sh
+quicssh_rs_args="--log-level error server --listen 0.0.0.0:${SSH_PORT} --proxy-to 127.0.0.1:${SSH_PORT}"

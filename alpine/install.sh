@@ -183,7 +183,7 @@ echo 'proc /proc proc defaults,hidepid=invisible 0 0' >> /etc/fstab
   wget -qO /etc/nginx/ssl/dh2048.pem https://ssl-config.mozilla.org/ffdhe2048.txt
 
   openssl genpkey -algorithm ed25519 -out /etc/nginx/ssl/selfsigned/example.com.key
-  openssl req -x509 -nodes -days 365 \
+  openssl req -x509 -nodes -days 36500 \
     -key /etc/nginx/ssl/selfsigned/example.com.key \
     -out /etc/nginx/ssl/selfsigned/example.com.crt \
     -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=example.com"

@@ -1,0 +1,21 @@
+#!/sbin/openrc-run
+
+name="quicssh-rs"
+
+command="/usr/local/bin/${name}"
+command_user="nobody:nobody"
+command_background="true"
+command_args="${quicssh_rs_args}"
+
+pidfile="/run/${name}.pid"
+output_logger="logger"
+error_logger="logger"
+
+depend() {
+	need net
+	use logger
+}
+
+start_pre() {
+	setcap CAP_NET_BIND_SERVICE=+eip "${command}"
+}

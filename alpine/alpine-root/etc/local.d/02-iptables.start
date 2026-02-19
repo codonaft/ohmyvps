@@ -12,9 +12,11 @@
 [ -f /usr/sbin/sshd ] && {
   for i in $(grepcidr -e '0.0.0.0/0' < "${SSH_ALLOWLIST}") ; do
     iptables -A INPUT -i "${NET_IFACE}" -p tcp -s "$i" --dport "${SSH_PORT}" -j ACCEPT
+    iptables -A INPUT -i "${NET_IFACE}" -p udp -s "$i" --dport "${SSH_PORT}" -j ACCEPT # for quicssh-rs
   done
   for i in $(grepcidr -e '::/0' < "${SSH_ALLOWLIST}") ; do
     ip6tables -A INPUT -i "${NET_IFACE}" -p tcp -s "$i" --dport "${SSH_PORT}" -j ACCEPT
+    ip6tables -A INPUT -i "${NET_IFACE}" -p udp -s "$i" --dport "${SSH_PORT}" -j ACCEPT # for quicssh-rs
   done
 }
 
