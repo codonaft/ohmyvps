@@ -79,30 +79,19 @@ done
 [ -f /usr/bin/tor ] && {
   for ipt in iptables ip6tables ; do
     "${ipt}" -I INPUT -j ACCEPT -i lo -p tcp --dport 8118:9050 --sport 1:65000
-    "${ipt}" -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8118:9050
-    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
-    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tor
   done
 }
 
 [ -f /usr/sbin/i2pd ] && {
   for ipt in iptables ip6tables ; do
-    "${ipt}" -A OUTPUT -j ACCEPT -m owner --uid-owner i2pd
     # "${ipt}" -A INPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
-    # "${ipt}" -A OUTPUT -p udp --dport "${I2P_UDP}" -j ACCEPT
     "${ipt}" -I INPUT -j ACCEPT -i lo -p tcp --dport 7070:4444 --sport 1:65000
-    "${ipt}" -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 7070:4444
-    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
-    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner i2pd
   done
 }
 
 [ -f /usr/bin/tinyproxy ] && {
   for ipt in iptables ip6tables ; do
     "${ipt}" -I INPUT -j ACCEPT -i lo -p tcp --dport 8889 --sport 1:65000
-    "${ipt}" -A OUTPUT -j ACCEPT -o lo -p tcp --dport 1:65000 --sport 8889
-    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -m owner --uid-owner root -o lo
-    "${ipt}" -A OUTPUT -p tcp -j ACCEPT -o "${NET_IFACE}" -m owner --uid-owner tinyproxy
   done
 }
 

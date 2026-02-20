@@ -4,7 +4,7 @@ allowed_services=$(echo 'hostname syslog' ; rc-update show default | sed 's! *!!
 
 inotifywait --event close_write,moved_to,create --monitor --recursive /etc/local.d/ |
   while read -r directory events filename ; do
-    rc-service --ifstarted local restart 2>>/dev/stdout | logger
+    rc-service --ifstarted local --verbose restart 2>>/dev/stdout | logger
   done &
 
 inotifywait --event close_write,moved_to,create --monitor --recursive /etc/conf.d/ |
