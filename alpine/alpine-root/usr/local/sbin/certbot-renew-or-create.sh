@@ -27,7 +27,6 @@ set -xeuo pipefail
 source /etc/profile.d/99local.sh
 
 WEBROOT_PATH='/var/www/certbot'
-NGINX_CONF_DIR='/etc/nginx/locations'
 MAX_DAYS_BEFORE_RENEW='30'
 
 PROD=${PROD:-0}
@@ -109,10 +108,10 @@ sudo su certbot -c "rm -fv ${challege_full_dir}/test_* ; echo -n ${expected} > $
 sudo /etc/init.d/nginx status
 
 IFS="," read -r -a domains_array <<< "${domains}"
-for i in ${domains_array[@]} ; do
+for i in "${domains_array[@]}" ; do
   url="http://$(echo $i | sed 's!^\*!!')/${challenge_dir}/${expected_filename}"
   echo "testing ${url}"
-  actual=$(sudo -u certbot wget --no-hsts -qO - ${url})
+  actual=$(sudo -u certbot wget --no-hsts -qO - "${url}")
   [ "${expected}" == "${actual}" ] || {
     echo 'nginx test failed'
     exit 1
@@ -121,7 +120,7 @@ done
 sudo su certbot -c "rm -fv ${challege_full_dir}/test_*"
 
 first_domain=$(echo "${domains}" | cut -d',' -f1 | sed 's!^\*\.!!')
-max_secs_before_renew=$((( MAX_DAYS_BEFORE_RENEW * 60 * 60 * 24 )))
+max_secs_before_renew=$(( MAX_DAYS_BEFORE_RENEW * 60 * 60 * 24 ))
 #max_secs_before_renew=100000000000 # NOTE: debug
 
 sudo cat "${fullchain}" | sudo -u certbot openssl x509 -checkend "${max_secs_before_renew}" -noout > /dev/null && {

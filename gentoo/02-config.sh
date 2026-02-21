@@ -122,7 +122,7 @@ post_emerge_packages() {
     for ntp_server in $(echo pool.ntp.org ; grep '^server ' /etc/ntp.conf | awk '{print $2}') ; do
       ntp_server_ips+=( $(nslookup "${ntp_server}" | grep Address: | awk '{print $2}' | grep -v '#') )
     done
-    fastest_ntp_server_ips=$(netselect -s 5 ${ntp_server_ips[@]} | awk '{print $2}' | tr '\n' ' ')
+    fastest_ntp_server_ips=$(netselect -s 5 "${ntp_server_ips[@]}" | awk '{print $2}' | tr '\n' ' ')
 
     hourly="/etc/cron.hourly"
     mkdir -p "${hourly}"

@@ -138,7 +138,7 @@ mount --make-slave /mnt/gentoo/run
 log "mounts ok"
 
 repos=$(
-  for i in ${WORLD_PACKAGES[@]} ; do
+  for i in "${WORLD_PACKAGES[@]}" ; do
     echo "$i" | sed 's!.*::!!'
   done | sort -u | grep -v '^gentoo$'
 ) || :

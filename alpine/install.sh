@@ -59,10 +59,10 @@ mount | grep "${TARGET_DISK}" >>/dev/null && {
   echo 'target disk is mounted, fixing it'
   disk_file=$(basename "${TARGET_DISK}")
   cp -r /.modloop /root/
-  cp -a /media/${disk_file}*/apks /root/
+  cp -a /media/"${disk_file}"*/apks /root/
   umount /.modloop /media/${disk_file}*
   ln -sf /root/.modloop/modules /lib/modules
-  for i in /media/${disk_file}*/ ; do
+  for i in /media/"${disk_file}"*/ ; do
     cp -a /root/apks "$i"
   done
 }

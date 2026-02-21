@@ -28,7 +28,7 @@ apks_changed() {
 }
 
 services[openssh]='sshd'
-for i in ${APKS[@]} ; do
+for i in "${APKS[@]}" ; do
   version_signatures["$i"]=$(apks_version_signature "$i")
   [ "${services[$i]}" = '' ] && services["$i"]="$i"
 done
@@ -54,7 +54,7 @@ onidle.py 2>>/dev/stdout | logger || :
 
 if [ -d "/lib/modules/$(uname -r)" ]; then
   logger 'kernel is the same'
-  for i in ${APKS[@]} ; do
+  for i in "${APKS[@]}" ; do
     apks_changed "$i" && rc-service --ifstarted "${services[$i]}" restart 2>>/dev/stdout | logger || :
   done
 else
