@@ -3,7 +3,7 @@
 source /etc/profile.d/99local.sh
 
 follow () {
-  tail -F /var/log/{messages,syslog} /var/log/nginx/{access,error}.log
+  tail -F "${SYSLOG}" /var/log/nginx/{access,error}.log
 }
 
 [[ $(wc -l "${LOCAL_BANLIST}" | awk '{print $1}') -gt 0 ]] && {

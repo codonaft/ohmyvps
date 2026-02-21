@@ -15,6 +15,8 @@ export LOCAL_BANLIST="/var/tmp/local-banlist.txt"
 export SSH_BANLIST="/etc/ssh/banlist.txt"
 export SSH_ALLOWLIST="/etc/ssh/allowlist.txt"
 
+export SYSLOG="/tmp/messages"
+
 export SSH_PORT=$( ( grep -E '^Port [0-9]*$' /etc/ssh/sshd_config || echo 'Port 22' ) | awk '{print $2}' )
 
 export NGINX_CLOUDFLARE_CONF="/etc/nginx/cloudflare.conf"
