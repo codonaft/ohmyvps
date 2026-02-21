@@ -2,9 +2,19 @@
 
 allowed_services=$(echo 'hostname syslog' ; rc-update show default | sed 's! *!!;s! | .*$!!')
 
+deduplicated_restart () {
+  service="$1"
+  interval="$2"
+  restart_command="sleep ${interval} && rc-service --ifstarted ${service} --verbose restart"
+  ps uax | grep "${restart_command}" | grep -v grep 2>>/dev/null || {
+    logger "will restart ${service} in ${interval}"
+    sh -c "${restart_command} 2>>/dev/stdout | logger" &
+  }
+}
+
 inotifywait --event close_write,moved_to,create --monitor --recursive /etc/local.d/ |
   while read -r directory events filename ; do
-    rc-service --ifstarted local --verbose restart 2>>/dev/stdout | logger
+    deduplicated_restart local 15s
   done &
 
 inotifywait --event close_write,moved_to,create --monitor --recursive /etc/conf.d/ |

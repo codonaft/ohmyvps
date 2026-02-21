@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-logger "running $0"
-
 MAX_USED_MEM=90
 MIN_USED_MEM=50
 
