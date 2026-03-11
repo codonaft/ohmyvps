@@ -7,6 +7,7 @@ command_user="nobody:nobody"
 command_background="true"
 command_args="${quicssh_rs_args}"
 
+capabilities="^cap_net_bind_service"
 pidfile="/run/${name}.pid"
 output_logger="logger"
 error_logger="logger"
@@ -14,8 +15,4 @@ error_logger="logger"
 depend() {
 	need net
 	use logger
-}
-
-start_pre() {
-	setcap CAP_NET_BIND_SERVICE=+eip "${command}"
 }
