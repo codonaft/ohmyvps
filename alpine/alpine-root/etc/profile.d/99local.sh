@@ -24,3 +24,4 @@ export NGINX_ALLOWLIST_CONF="/etc/nginx/allowlist.conf"
 
 export NET_IFACE=$(grep '^auto e' /etc/network/interfaces | awk '{print $2}' | head -n1)
 export NET_IPV4=$(grep -A 3 '^auto e' /etc/network/interfaces | grep address | head -n1 | awk '{print $2}' | grepcidr -e '0.0.0.0/0')
+export NET_IPV6_GW=$(grep 'gateway' /etc/network/interfaces | awk '{print $2}' | grepcidr -e '::/0')

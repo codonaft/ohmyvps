@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 ## allow DHCP
 #iptables -A INPUT -p udp --dport 68 -j ACCEPT
@@ -16,6 +16,9 @@ done
 for i in $(grepcidr -e '::/0' < "${SSH_ALLOWLIST}") ; do
   ip6tables -A INPUT -p icmpv6 -s "$i" -j ACCEPT
 done
+
+# some VPSes require incoming ICMPv6 from gateway to be allowed (perhaps Neighbor Discovery Protocol related)
+[ ! -z "${NET_IPV6_GW}" ] && ip6tables -A INPUT -p icmpv6 -s "${NET_IPV6_GW}" -j ACCEPT
 
 ## allow ICMP traffic from all IPs
 #iptables -A INPUT -p icmp -j ACCEPT
