@@ -3,6 +3,7 @@ PIDFile /run/tor/tor.pid
 Log notice syslog
 DataDirectory /var/lib/tor/data
 ExitRelay 0
+ExitPolicy reject *:*
 ExcludeExitNodes {am}, {az}, {by}, {ee}, {ge}, {kg}, {kz}, {lt}, {ly}, {md}, {ru}, {tj}, {tm}, {ua}, {uz}
 AvoidDiskWrites 1
 
