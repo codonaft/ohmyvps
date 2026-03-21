@@ -12,7 +12,7 @@ sum() {
   load | sha256sum
 }
 
-write () {
+write() {
   version="$1"
   cidr="$2"
   target="$3"
@@ -26,7 +26,7 @@ write () {
   [ "$(stat --format='%s' ${temp})" -gt 1 ] && mv "${temp}" "${output}"
 }
 
-download () {
+download() {
   target="$1"
   ips=$(sudo -u nobody wget --timeout=30 --tries=10 -qO - "https://www.gstatic.com/ipranges/${target}.json")
   write 4 '0.0.0.0/0' "${target}" <<< "${ips}"
