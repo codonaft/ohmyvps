@@ -38,7 +38,7 @@ def is_nginx_config_valid():
 
 def is_nginx_active():
     try:
-        grep = getoutput(f"grep -EoR 'access_log\\s.*;' /etc/nginx/").split('\n')
+        grep = getoutput(f"grep -EoR 'access_log\\s*\\/.*;' /etc/nginx/").split('\n')
         nginx_logs = set(i.split(':', 1)[1].split('access_log', 1)[1].strip().split()[0].strip() for i in grep)
         nginx_logs_pattern = ' '.join(nginx_logs)
         tail = getoutput(f"tail --lines=100 {nginx_logs_pattern} | grep -E ' HTTP/[0-9.]{{1,}}\" 200 ' | grep -Eo '(\\[.*\\])'").split('\n')
@@ -77,7 +77,7 @@ while True:
 
     detected_processes = CRITIAL_PROCESSES.intersection(i.info['name'] for i in psutil.process_iter(['name']))
     if len(detected_processes) > 0:
-        info('detected critical processes', detected_processes)
+        info(f'detected critical processes {detected_processes}')
         continue
 
     if not is_nginx_config_valid():
