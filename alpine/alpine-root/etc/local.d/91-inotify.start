@@ -23,7 +23,7 @@ inotifywait --event close_write,moved_to,create --monitor --recursive /etc/conf.
   while read -r directory events filename ; do
     [ -f "/etc/init.d/${filename}" ] && \
       grep --extended-regexp '(^| )'${filename}'($| )' <<< "${allowed_services}" >>/dev/null && \
-      ( rc-service --ifstarted "${filename}" reload || rc-service --ifstarted "${filename}" restart ) 2>>/dev/stdout | \
+      ( rc-service --ifstarted "${filename}" reload || apply_deduplicated restart "${filename}" 10s ) 2>>/dev/stdout | \
         logger -t "${tag}"
   done &
 
