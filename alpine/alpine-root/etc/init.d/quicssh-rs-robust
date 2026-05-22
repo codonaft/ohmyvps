@@ -3,7 +3,7 @@
 command="/usr/local/bin/${RC_SVCNAME}"
 command_user="nobody:nobody"
 command_background="true"
-command_args="${quicssh_rs_args}"
+command_args="${quicssh_rs_robust_args}"
 
 capabilities="^cap_net_bind_service"
 pidfile="/run/${RC_SVCNAME}.pid"
