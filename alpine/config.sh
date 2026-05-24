@@ -28,6 +28,7 @@ export WORLD_PACKAGES=(
   #certbot
   colordiff
   coreutils
+  #conntrack-tools
   #crystal
   curl
   #e2fsprogs-extra
