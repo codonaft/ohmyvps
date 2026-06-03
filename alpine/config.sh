@@ -31,6 +31,7 @@ export WORLD_PACKAGES=(
   #conntrack-tools
   #crystal
   curl
+  dnscrypt-proxy
   #e2fsprogs-extra
   file
   grepcidr3
@@ -65,6 +66,7 @@ export WORLD_PACKAGES=(
 
 export ADD_TO_DEFAULT_RUNLEVEL=(
   cgroups
+  dnscrypt-proxy
   local
   ntpd
   sshd
@@ -80,7 +82,8 @@ HOSTNAMEOPTS='${VPS_HOSTNAME}'
 
 DEVDOPTS='mdev'
 
-DNSOPTS='9.9.9.9 1.1.1.1'
+#DNSOPTS='9.9.9.9 1.1.1.1'
+DNSOPTS='127.0.0.1'
 
 TIMEZONEOPTS='UTC'
 
