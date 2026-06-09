@@ -6,6 +6,7 @@ export MKFS_OPTS='fast_commit'
 export MOUNT_OPTS='defaults,noatime,nodiratime,discard,commit=60,errors=remount-ro'
 
 export SSH_PORT='666'
+export SSH_ALLOW_TCP='1'
 export VPS_HOSTNAME='vps'
 
 export ROOT_SHELL='/bin/zsh'

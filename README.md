@@ -3,10 +3,12 @@
 - `nginx` runs completely rootless
 - firewall disallows all incoming connections, besides `ssh`, `http` and `https` by default
 - `ssh`
-    - default `sshd` configuration disallows password authentication
-    - manual `ssh` port by default
-    - allow-list for incoming `ssh` connections
-        - alternatively, firewall autobans those who failed to login
+  - default `sshd` configuration disallows password authentication
+  - manual `ssh` port by default
+  - normal `tcp`-based `ssh` can be disallowed
+    - [`quicssh-rs-robust`](https://github.com/hkatsuma/quicssh-rs-robust/tree/v0.1.6#client-ssh-config) is required on client in this case
+  - allow-list for incoming `ssh` connections
+    - ~~alternatively, firewall autobans those who failed to login~~
 - designed for `tmux` + `vim` users.
 
 ## Installation
