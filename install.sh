@@ -157,7 +157,7 @@ case "${os}" in
         echo '#!/bin/sh
           cat << EOF
           menuentry "Alpine Linux" --unrestricted {
-            linux /boot/vmlinuz-virt random.trust_cpu=off
+            linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1
             initrd /boot/initramfs-virt
           }
           EOF' > /etc/grub.d/99_custom
