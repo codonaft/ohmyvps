@@ -1,8 +1,8 @@
 export RUSTFLAGS="-C target-cpu=native -C force-frame-pointers=y"
-export CFLAGS="-O2 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
-export CXXFLAGS="-O2 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
-export FCFLAGS="-O2 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
-export FFLAGS="-O2 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
+export CFLAGS="-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
+export CXXFLAGS="-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
+export FCFLAGS="-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
+export FFLAGS="-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always"
 export LDFLAGS="-Wl,-z,now -Wl,-z,relro"
 #export MAKEOPTS="-j16 -l16"
 
