@@ -177,6 +177,12 @@ echo 'tmpfs /root/tmp tmpfs nosuid,nodev,mode=1700,uid=0,gid=0,size=128M 0 0' >>
 echo 'tmpfs /home/${USERNAME}/tmp tmpfs nosuid,nodev,mode=1700,uid=1000,gid=1000,size=128M 0 0' >> /etc/fstab
 echo 'proc /proc proc defaults,hidepid=invisible 0 0' >> /etc/fstab
 
+[ -e /usr/sbin/unbound ] && {
+  mkdir -m 00700 -p /etc/unbound/var
+  chown unbound:root /etc/unbound/var
+  sudo -u unbound unbound-anchor -v -a /etc/unbound/var/root.key
+}
+
 [ -e /usr/sbin/nginx ] && {
   touch /var/lib/nginx/logs/{access,error}.log
   chown nginx:nginx /var/lib/nginx/logs/{access,error}.log

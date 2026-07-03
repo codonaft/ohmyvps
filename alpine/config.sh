@@ -32,7 +32,6 @@ export WORLD_PACKAGES=(
   #conntrack-tools
   #crystal
   curl
-  dnscrypt-proxy
   #e2fsprogs-extra
   file
   grepcidr3
@@ -58,6 +57,7 @@ export WORLD_PACKAGES=(
   tmux
   #tor
   tshark
+  unbound
   util-linux
   vim
   yq
@@ -67,11 +67,11 @@ export WORLD_PACKAGES=(
 
 export ADD_TO_DEFAULT_RUNLEVEL=(
   cgroups
-  dnscrypt-proxy
   local
   ntpd
   sshd
   tinyproxy
+  unbound
 )
 
 # https://github.com/alpinelinux/alpine-conf/blob/master/setup-alpine.in
