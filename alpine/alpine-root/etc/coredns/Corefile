@@ -1,0 +1,29 @@
+. {
+  loop
+
+  bind 127.0.0.1 ::1
+
+  #log
+  #errors
+
+  cache {
+    prefetch 1
+    serve_stale
+  }
+
+  timeouts {
+    read 1m
+    write 1m
+    idle 24h
+  }
+
+  forward . dns://127.0.0.1:5350 {
+    force_tcp
+    policy sequential
+  }
+
+  #forward . dns://127.0.0.1:5353 tls://9.9.9.11 tls://1.1.1.1 {
+  #  prefer_udp
+  #  policy sequential
+  #}
+}

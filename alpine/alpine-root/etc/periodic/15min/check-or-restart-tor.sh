@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source /etc/profile.d/99local.sh
+
 [ -f /etc/init.d/tor ] && {
-  sudo -u nobody curl -I --insecure --max-time 120 --socks5-hostname '127.0.0.1:9050' 'http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion' || rc-service tor restart
+  sudo -u nobody dig -p ${TOR_DNS_PORT} +tcp +timeout=120 www.cloudflare.com | grep NOERROR || rc-service tor restart
 }

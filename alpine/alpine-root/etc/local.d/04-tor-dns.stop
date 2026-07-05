@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+kill $(ps uax | grep -E " socat .*${TOR_DNS_HOST}" | grep -v grep | awk '{print $2}')

@@ -25,9 +25,11 @@ export SSH_ALLOWED_IPS=(
 )
 
 export WORLD_PACKAGES=(
+  bind-tools
   busybox-extras
   #certbot
   colordiff
+  coredns
   coreutils
   #conntrack-tools
   #crystal
@@ -52,10 +54,11 @@ export WORLD_PACKAGES=(
   py3-psutil
   rsync
   rtorrent
+  socat
   sudo
   #tinyproxy
   tmux
-  #tor
+  tor
   tshark
   unbound
   util-linux
@@ -67,10 +70,12 @@ export WORLD_PACKAGES=(
 
 export ADD_TO_DEFAULT_RUNLEVEL=(
   cgroups
+  coredns
   local
   ntpd
   sshd
   tinyproxy
+  tor
   unbound
 )
 

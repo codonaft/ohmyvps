@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 [ -f "${LOCAL_BANLIST}" ] && {
   for i in $(grepcidr -e '0.0.0.0/0' < "${LOCAL_BANLIST}") ; do
