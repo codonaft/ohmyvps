@@ -236,6 +236,8 @@ chattr +i /etc/update-extlinux.conf
 echo 'source /etc/profile.d/99local.sh' > /etc/conf.d/local
 chattr +i /etc/conf.d/local
 
+chattr +i /root/.config/htop/htoprc || :
+
 sync
 echo 3 > /proc/sys/vm/drop_caches
 cat /etc/alpine-release || :

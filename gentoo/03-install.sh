@@ -333,6 +333,7 @@ set -e
 [ -e /root/.zshrc.pre-oh-my-zsh ] && mv -fv /root/.zshrc{.pre-oh-my-zsh,}
 [ -e /home/${USERNAME}/.zshrc.pre-oh-my-zsh ] && mv -fv /home/${USERNAME}/.zshrc{.pre-oh-my-zsh,}
 [ -e /etc/conf.d/nginx ] && chattr +i /etc/conf.d/nginx
+chattr +i /root/.config/htop/htoprc || :
 
 rm -v /$(basename "${stage3_url}")*
 sync

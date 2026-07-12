@@ -1,1 +1,4 @@
+hide_kernel_threads=0
+show_cpu_frequency=1
+show_cpu_temperature=1
 delay=2
