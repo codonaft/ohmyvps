@@ -7,23 +7,26 @@
   #errors
 
   cache {
-    prefetch 1
-    serve_stale
-  }
-
-  timeouts {
-    read 1m
-    write 1m
-    idle 24h
+    prefetch 4096 20s
+    serve_stale 48h
   }
 
   forward . dns://127.0.0.1:5350 {
     force_tcp
     policy sequential
+    health_check 10s
+    failfast_all_unhealthy_upstreams
   }
 
-  #forward . dns://127.0.0.1:5353 tls://9.9.9.11 tls://1.1.1.1 {
+  #forward . dns://127.0.0.1:5353 {
   #  prefer_udp
   #  policy sequential
+  #}
+
+  #forward . tls://9.9.9.11 {
+  #  tls_servername dns.quad9.net
+  #  prefer_udp
+  #  policy sequential
+  #  health_check 2s
   #}
 }
