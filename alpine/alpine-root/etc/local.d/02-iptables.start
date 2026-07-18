@@ -20,6 +20,11 @@
   done
 }
 
+[ -f /usr/bin/tor ] && {
+  iptables -t nat -A OUTPUT -p tcp -d $(grep VirtualAddrNetworkIPv4 /etc/tor/torrc | awk '{print $2}') -j REDIRECT --to-ports 9052
+  ip6tables -t nat -A OUTPUT -p tcp -d $(grep VirtualAddrNetworkIPv6 /etc/tor/torrc | awk '{print $2}' | sed 's!\[!!;s!\]!!') -j REDIRECT --to-ports 9052
+}
+
 # for ISPs that block traffic to standard DNS port
 for i in 9.9.9.9 149.112.112.112 9.9.9.11 149.112.112.11 9.9.9.10 149.112.112.10 ; do
   iptables -t nat -A OUTPUT -p tcp -d "$i" --dport 53 -j DNAT --to-destination "$i:9953"

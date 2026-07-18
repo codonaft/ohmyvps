@@ -1,3 +1,20 @@
+onion {
+  loop
+
+  bind 127.0.0.1 ::1
+
+  #log
+  #errors
+
+  forward onion dns://127.0.0.1:9053 {
+    prefer_udp
+    policy sequential
+    health_check 1s
+    failfast_all_unhealthy_upstreams
+    failover SERVFAIL REFUSED
+  }
+}
+
 . {
   loop
 
@@ -9,18 +26,29 @@
   cache {
     prefetch 4096 20s
     serve_stale 48h
+    servfail 1s
   }
+
+  # disable ipv6
+  #template IN AAAA {
+  #  rcode NOERROR
+  #}
 
   forward . dns://127.0.0.1:5350 {
     force_tcp
     policy sequential
-    health_check 10s
+    health_check 1s
     failfast_all_unhealthy_upstreams
+    failover SERVFAIL REFUSED
   }
 
+  # unbound
   #forward . dns://127.0.0.1:5353 {
   #  prefer_udp
   #  policy sequential
+  #  health_check 1s
+  #  failfast_all_unhealthy_upstreams
+  #  failover SERVFAIL REFUSED
   #}
 
   #forward . tls://9.9.9.11 {
