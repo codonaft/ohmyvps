@@ -23,9 +23,6 @@ find /coredumps/ /home/*/Downloads/ /var/tmp/portage/ -mindepth 1 -not -path '*/
 # remove at least 1y old rotated logs
 find /var/log/ -mindepth 1 -path '*/*.gz' -mtime +365 -exec rm -f {} +
 
-find /root/.vimundo/ -type f -mtime +90 -delete
-find /root/.vimswaps/ -type f -mtime +90 -delete
-find /home/*/.vimundo/ -type f -mtime +90 -delete
-find /home/*/.vimswaps/ -type f -mtime +90 -delete
+find /{root,home/*}/tmp/.vim{undo,swaps}/ /var/spool/nullmailer/ -type f -mtime +90 -delete
 
 find / -xdev -type d -name __MACOSX -exec rm -rf {} +
