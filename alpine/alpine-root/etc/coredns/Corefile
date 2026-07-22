@@ -51,10 +51,10 @@ onion {
   #  failover SERVFAIL REFUSED
   #}
 
-  #forward . tls://9.9.9.11 {
-  #  tls_servername dns.quad9.net
-  #  prefer_udp
+  #forward . tls://9.9.9.11 tls://149.112.112.11 {
   #  policy sequential
-  #  health_check 2s
+  #  health_check 1s
+  #  failfast_all_unhealthy_upstreams
+  #  failover SERVFAIL REFUSED
   #}
 }
