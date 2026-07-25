@@ -2,12 +2,12 @@
 
 source /etc/profile.d/99local.sh
 
-ps uax | grep -E " socat .*${TOR_DNS_HOST}" | grep -v grep >>/dev/null || {
+ps uax | grep -E " socat .*${EXTERNAL_TOR_DNS}" | grep -v grep >>/dev/null || {
   rc-service local restart
 }
 
 [ -f /etc/init.d/tor ] && {
-  sudo -u nobody dig -p ${TOR_DNS_PORT} +tcp +timeout=120 www.cloudflare.com | grep NOERROR || rc-service tor restart
+  sudo -u nobody dig -p ${EXTERNAL_TOR_DNS_LOCAL_TCP_PORT} +tcp +timeout=120 www.cloudflare.com | grep NOERROR || rc-service tor restart
 }
 
 [ -f /etc/init.d/i2pd ] && {

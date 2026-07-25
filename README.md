@@ -2,6 +2,7 @@
 - currently `x86_64` is the only supported
 - `nginx` runs completely rootless
 - firewall disallows all incoming connections, besides `ssh`, `http` and `https` by default
+- DNS using Cloudflare onion hidden service + anti-ads/tracking/malware banlist by default
 - `ssh`
   - default `sshd` configuration disallows password authentication
   - manual `ssh` port by default

@@ -118,6 +118,8 @@ chroot /mnt /bin/bash -s << END
 
 set -xeuo pipefail
 
+source /etc/profile.d/99local.sh || :
+
 echo "installing packages"
 apk del doas linux-lts openssh-server-pam syslinux || :
 apk add alpine-sdk bash etckeeper git grep grub grub-bios libcap linux-virt musl-dev procps python3 shadow ${WORLD_PACKAGES[*]}
@@ -134,9 +136,9 @@ done
 
 which vim && ln -sf /usr/bin/vim /usr/local/bin/vi
 
-echo -n > /etc/ssh/allowlist.txt
+touch \${LOCAL_BANLIST} \${DNS_BANLIST} \${SSH_BANLIST} \${SSH_ALLOWLIST}
 for i in ${SSH_ALLOWED_IPS[@]} ; do
-  echo "\$i" >> /etc/ssh/allowlist.txt
+  echo "\$i" >> \${SSH_ALLOWLIST}
 done
 
 echo "setting up users"
@@ -224,19 +226,15 @@ git config --global user.email "root@${VPS_HOSTNAME}"
 rm -fv /etc/ssh/ssh_host_*
 sort -u < /etc/apk/repositories | grep -v 'http://' > /etc/apk/repositories || :
 
+for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
+  chattr +i \$i || :
+done
+
 cd /etc
 rm -f motd
 etckeeper init
 etckeeper commit Initial
 cd /
-
-chattr +i /etc/update-extlinux.conf
-[ -e /etc/conf.d/nginx ] && chattr +i /etc/conf.d/nginx
-
-echo 'source /etc/profile.d/99local.sh' > /etc/conf.d/local
-chattr +i /etc/conf.d/local
-
-chattr +i /root/.config/htop/htoprc || :
 
 sync
 echo 3 > /proc/sys/vm/drop_caches

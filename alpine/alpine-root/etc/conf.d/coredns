@@ -1,0 +1,6 @@
+COREDNS_CONFIG="/etc/coredns/Corefile"
+COREDNS_EXTRA_ARGS=""
+
+#COREDNS_HEALTHCHECK_URI="127.0.0.1:8080/health"
+
+source /etc/profile.d/99local.sh

@@ -54,6 +54,7 @@ export WORLD_PACKAGES=(
   py3-psutil
   rsync
   rtorrent
+  sed
   socat
   sudo
   #tinyproxy
@@ -76,7 +77,7 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
   sshd
   tinyproxy
   tor
-  unbound
+  #unbound
 )
 
 # https://github.com/alpinelinux/alpine-conf/blob/master/setup-alpine.in
@@ -88,7 +89,7 @@ HOSTNAMEOPTS='${VPS_HOSTNAME}'
 
 DEVDOPTS='mdev'
 
-#DNSOPTS='9.9.9.9 1.1.1.1'
+#DNSOPTS='9.9.9.11 149.112.112.11'
 DNSOPTS='127.0.0.1'
 
 TIMEZONEOPTS='UTC'

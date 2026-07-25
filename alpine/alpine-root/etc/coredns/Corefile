@@ -6,7 +6,7 @@ onion {
   #log
   #errors
 
-  forward onion dns://127.0.0.1:9053 {
+  forward onion dns://127.0.0.1:{$TOR_ONION_DNS_UDP_PORT} {
     prefer_udp
     policy sequential
     health_check 1s
@@ -23,6 +23,11 @@ onion {
   #log
   #errors
 
+  hosts {$DNS_BANLIST} {
+    reload 1h
+    fallthrough
+  }
+
   cache {
     prefetch 4096 20s
     serve_stale 48h
@@ -34,7 +39,7 @@ onion {
   #  rcode NOERROR
   #}
 
-  forward . dns://127.0.0.1:5350 {
+  forward . dns://127.0.0.1:{$EXTERNAL_TOR_DNS_LOCAL_TCP_PORT} {
     force_tcp
     policy sequential
     health_check 1s
@@ -42,8 +47,7 @@ onion {
     failover SERVFAIL REFUSED
   }
 
-  # unbound
-  #forward . dns://127.0.0.1:5353 {
+  #forward . dns://127.0.0.1:{$UNBOUND_DNS_PORT} {
   #  prefer_udp
   #  policy sequential
   #  health_check 1s
