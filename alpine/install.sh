@@ -108,15 +108,17 @@ sed --in-place "s!^#Port 22!Port ${SSH_PORT}!;s!^#PasswordAuthentication yes!Pas
 sed --in-place "/^\/.*/d;s!^#http!http!;s!^http:!https:!" /mnt/etc/apk/repositories || :
 sed --in-place "s!\s*ext4\s*rw,relatime\s*!\text4\t${MOUNT_OPTS} !" /mnt/etc/fstab || :
 
-mkdir -p /mnt/coredumps
-chmod 00700 /mnt/coredumps
-chmod 00440 /mnt/etc/sudoers || :
-
 echo "entering chroot"
 chroot /mnt /bin/bash -s << END
 #!/usr/bin/env bash
 
 set -xeuo pipefail
+
+mkdir -p /coredumps
+chmod 00440 /etc/sudoers
+chmod 00640 /etc/ssh/sshd_config
+chmod 00700 /coredumps
+chown root:wheel /etc/ssh/sshd_config
 
 source /etc/profile.d/99local.sh || :
 

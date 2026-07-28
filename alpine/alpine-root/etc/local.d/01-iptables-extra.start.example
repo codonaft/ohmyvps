@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # disallow some of the legacy unencrypted protocols
-for i in 20 21 23 25 49 69 80 109 110 119 143 161 162 194 389 513 514 5060 6667 ; do
+for i in 20 21 23 25 49 69 80 109 110 119 143 161 162 194 389 513 514 5060 6667 8080 ; do
   iptables -A OUTPUT -p tcp --dport "$i" -j REJECT
   ip6tables -A OUTPUT -p tcp --dport "$i" -j REJECT
 done
