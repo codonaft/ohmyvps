@@ -14,12 +14,20 @@ sum() {
   load | sha256sum
 }
 
+get() {
+  url="$1"
+  sudo -u nobody wget --timeout=30 --tries=10 -qO - "${url}"
+  echo
+}
+
 download() {
   version="$1"
   cidr="$2"
   output="${PATH_PREFIX}${version}.txt"
   temp="${output}.tmp"
-  sudo -u nobody wget --timeout=30 --tries=10 -qO - "https://www.cloudflare.com/ips-v${version}" | grepcidr -e "${cidr}" | sort -u > "${temp}"
+  ( get "https://www.cloudflare.com/ips-v${version}" ; get "https://raw.githubusercontent.com/lord-alfred/ipranges/main/cloudflare/ipv${version}_merged.txt" ) | \
+    grepcidr -e "${cidr}" | \
+    sort -u > "${temp}"
   [ "$(stat --format='%s' ${temp})" -gt 1 ] && mv "${temp}" "${output}"
 }
 
