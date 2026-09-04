@@ -37,6 +37,7 @@ export WORLD_PACKAGES=(
   #e2fsprogs-extra
   file
   grepcidr3
+  gzip
   htop
   #i2pd
   inotify-tools
