@@ -36,6 +36,7 @@ export WORLD_PACKAGES=(
   curl
   #e2fsprogs-extra
   file
+  #gcompat
   grepcidr3
   gzip
   htop
