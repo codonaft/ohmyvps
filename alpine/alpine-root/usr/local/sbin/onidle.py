@@ -7,7 +7,7 @@ from time import sleep
 import psutil
 import sys
 
-TIMEOUT = timedelta(hours=2)
+TIMEOUT = timedelta(minutes=15)
 NGINX_MIN_DELTA_ACCESS = timedelta(minutes=1)
 BANDWIDTH_DELTA_TIME = timedelta(seconds=10)
 MAX_SSH_ALLOWLIST_BANDWIDTH_BYTES_PER_SEC = 50 * 1024
