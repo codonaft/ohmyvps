@@ -85,7 +85,7 @@ download_and_unpack() {
   wget https://api.github.com/repos/codonaft/ohmyvps/tarball -O - | tar xzf -
 }
 
-if [ "$(id -u)" != "0" ] ; then
+if [ "$(id -u)" != '0' ] ; then
   echo 'You need to be root'
   exit 1
 fi
@@ -101,30 +101,34 @@ iptables -X
 iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 iptables -A INPUT -i "${net_iface}" -j DROP
 
-os="Alpine Linux"
-grep Ubuntu /etc/*release && os="Gentoo Linux"
+BOOT_ALPINE='Boot Alpine'
+INSTALL_ALPINE='Install Alpine'
+INSTALL_GENTOO='Install Gentoo'
 
 clear
-echo "1. Install ${os}"
-echo '2. Boot Alpine Linux'
+if grep Ubuntu /etc/*release >> /dev/null ; then
+  echo "1. ${BOOT_ALPINE}"
+  echo "2. ${INSTALL_GENTOO}"
+else
+  echo "1. ${INSTALL_ALPINE}"
+  echo "2. ${INSTALL_GENTOO}"
+fi
 echo
 
 default_choice='1'
 read -p "What's next? [${default_choice}] " choice
 choice="${choice:-${default_choice}}"
 
-[ "${choice}" = 2 ] && os="Boot Alpine Linux"
+if grep Ubuntu /etc/*release >> /dev/null ; then
+  action="${BOOT_ALPINE}"
+  [ "${choice}" = 2 ] && action="${INSTALL_GENTOO}"
+else
+  action="${INSTALL_ALPINE}"
+  [ "${choice}" = 2 ] && action="${INSTALL_GENTOO}"
+fi
 
-case "${os}" in
-    "Alpine Linux")
-        download_and_unpack
-        *ohmyvps*/alpine/install.sh
-        ;;
-    "Gentoo Linux")
-        download_and_unpack
-        *ohmyvps*/gentoo/01-run-tmux.sh
-        ;;
-    "Boot Alpine Linux")
+case "${action}" in
+    "${BOOT_ALPINE}")
         ARCH='x86_64'
         VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
 
@@ -168,6 +172,14 @@ case "${os}" in
         sync
         echo 3 > /proc/sys/vm/drop_caches
         reboot
+        ;;
+    "${INSTALL_ALPINE}")
+        download_and_unpack
+        *ohmyvps*/alpine/install.sh
+        ;;
+    "${INSTALL_GENTOO}")
+        download_and_unpack
+        *ohmyvps*/gentoo/01-run-tmux.sh
         ;;
     *)
         ;;

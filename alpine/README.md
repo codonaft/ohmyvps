@@ -27,7 +27,7 @@ or
 sh -c "$(wget -O - https://omv.codonaft.com)"
 ```
 
-Choose `2` → login as `root` → configure network again.
+Choose `1` → login as `root` → configure network again.
 
 ### 3. Install
 ```bash
@@ -38,7 +38,7 @@ Choose `1`. You will see vim with setup configuration file.
 
 You don't necessarily need a completely empty root partition to start installing.
 You'll need a disk with `dos` partition table and with a **single** primary ext4 partition.
-Set `FORMAT_DISK='1'` to create it.
+`FORMAT_DISK='1'` creates it by default.
 
 None of the files in `alpine-root/` are strictly required, you can remove entire directory using other tty on this step (although this wasn't heavily tested) and do manual configuration before/after installation.
 

@@ -49,8 +49,8 @@ script_dir=$(realpath "$(dirname "$0")")
 cd "${script_dir}"
 
 echo 'disable sshd'
-rc-service --ifstarted sshd stop 2>>/dev/null || :
-apk del openssh 2>>/dev/null || :
+rc-service --ifstarted sshd stop 2>> /dev/null || :
+apk del openssh 2>> /dev/null || :
 echo -n > /etc/init.d/openssh || :
 chattr +i /etc/init.d/openssh || :
 
@@ -74,7 +74,7 @@ echo "USEROPTS='none'" >> .answers.conf
 echo "APKREPOSOPTS='$(cat /etc/apk/repositories)'" >> .answers.conf
 echo "INTERFACESOPTS='$(cat /etc/network/interfaces)'" >> .answers.conf
 
-mount | grep "${TARGET_DISK}" >>/dev/null && {
+mount | grep "${TARGET_DISK}" >> /dev/null && {
   echo 'target disk is mounted, fixing it'
   disk_file=$(basename "${TARGET_DISK}")
   cp -r /.modloop /root/
@@ -86,7 +86,7 @@ mount | grep "${TARGET_DISK}" >>/dev/null && {
   done
 }
 
-mount | grep "${TARGET_DISK}" >>/dev/null && {
+mount | grep "${TARGET_DISK}" >> /dev/null && {
   echo "${TARGET_DISK} is still mounted?"
   exit 1
 }
@@ -120,9 +120,7 @@ mount --rbind /dev /mnt/dev
 mount --rbind /sys /mnt/sys
 mount --rbind /proc /mnt/proc
 
-if [ -d alpine-root/ ] ; then
-  rsync --archive --no-perms --no-group --no-owner --chmod=go-w alpine-root/ /mnt/
-fi
+[ -d alpine-root/ ] && rsync --archive --no-perms --no-group --no-owner --chmod=go-w alpine-root/ /mnt/
 
 sed --in-place 's!^default_kernel_opts="quiet \(.*\)"$!default_kernel_opts="\1 random.trust_cpu=off init_on_free=1 init_on_alloc=1"!g;s!^default=.*$!default=virt!' /mnt/etc/update-extlinux.conf # affects grub as well
 sed --in-place "s!^#Port 22!Port ${SSH_PORT}!;s!^#PasswordAuthentication yes!PasswordAuthentication no!;s!^AllowTcpForwarding no!AllowTcpForwarding yes!" /mnt/etc/ssh/sshd_config
@@ -144,7 +142,7 @@ chmod 00640 /etc/ssh/sshd_config
 chmod 00700 /coredumps
 chown root:wheel /etc/ssh/sshd_config
 
-source /etc/profile.d/99local.sh 2>>/dev/null || :
+source /etc/profile.d/99local.sh 2>> /dev/null || :
 
 echo "installing packages"
 apk del doas linux-lts openssh-server-pam syslinux || :
@@ -185,9 +183,7 @@ chsh --shell "${ROOT_SHELL}" "${USERNAME}"
 echo "setting up home dir"
 mkdir -p /home/USERNAME_WILL_BE_AUTOMATICALLY_REPLACED
 mv -f /home/USERNAME_WILL_BE_AUTOMATICALLY_REPLACED/{*,.*} "/home/${USERNAME}/"
-if [ ! -e /home/${USERNAME}/.bash_alias ] ; then
-  [ -e /root/.bash_alias ] && cp -v /root/.bash_alias /home/${USERNAME}/.bash_alias
-fi
+[ ! -e /home/${USERNAME}/.bash_alias ] && [ -e /root/.bash_alias ] && cp -v /root/.bash_alias /home/${USERNAME}/.bash_alias
 rm -rf /home/USERNAME_WILL_BE_AUTOMATICALLY_REPLACED
 chmod 00700 "/home/${USERNAME}"
 chown -R "${USERNAME}:${USERNAME}" "/home/${USERNAME}"
