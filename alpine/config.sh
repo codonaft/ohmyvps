@@ -76,11 +76,15 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
   coredns
   local
   ntpd
+  quicssh-rs-robust
   sshd
   tinyproxy
   tor
   #unbound
 )
+
+export RUST_VERSION='1.99.1'
+export QUICSSH_ROBUST_VERSION='0.1.6'
 
 # https://github.com/alpinelinux/alpine-conf/blob/master/setup-alpine.in
 

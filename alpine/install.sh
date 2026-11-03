@@ -49,6 +49,7 @@ vim config.sh
 source config.sh
 
 setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
+apk add e2fsprogs gcc musl-dev podman sfdisk sgdisk
 
 echo "${ANSWERS}" > .answers.conf
 echo "USEROPTS='none'" >> .answers.conf
@@ -73,7 +74,6 @@ mount | grep "${TARGET_DISK}" >>/dev/null && {
 }
 
 root_partition="${TARGET_DISK}1"
-apk add sfdisk sgdisk e2fsprogs
 [ "${FORMAT_DISK}" == 1 ] && {
   echo 'creating partition table and filesystem'
   sgdisk --zap-all "${TARGET_DISK}"
@@ -243,7 +243,24 @@ echo 3 > /proc/sys/vm/drop_caches
 cat /etc/alpine-release || :
 END
 
+echo 'building quicssh-rs-robust'
+apk add --update --no-cache rustup
+rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target x86_64-unknown-linux-musl
+source ~/.cargo/env
+rustc --print target-cpus | grep native | sed 's/.* (currently //;s/)\.//' > /mnt/etc/target-cpu
+export CFLAGS='-march=native -O3 -mno-rdrnd -fstack-protector-all -fstack-clash-protection'
+export CXXFLAGS="${CFLAGS}"
+export FCFLAGS="${CFLAGS}"
+export FFLAGS="${CFLAGS}"
+export LDFLAGS='-Wl,-z,now -Wl,-z,relro'
+export RUSTFLAGS='-C target-cpu=native -C force-frame-pointers=y'
+cargo install --force --locked --version "${QUICSSH_ROBUST_VERSION}"
+mv ~/.cargo/bin/quicssh-rs-robust /mnt/usr/local/bin/
+
+sync
+echo 3 > /proc/sys/vm/drop_caches
+
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
-echo "INSTALLATION SUCCESS! You can reboot now."
+echo 'INSTALLATION SUCCESS! You can reboot now.'
