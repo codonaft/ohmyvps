@@ -80,7 +80,6 @@ Mkc=
 -----END PGP PUBLIC KEY BLOCK-----'
 
 ALPINE_MIRROR='https://dl-cdn.alpinelinux.org/alpine'
-ALPINE_LATEST_STABLE="${ALPINE_MIRROR}/latest-stable"
 
 download_and_unpack() {
   wget https://api.github.com/repos/codonaft/ohmyvps/tarball -O - | tar xzf -
@@ -91,15 +90,16 @@ if [ "$(id -u)" != "0" ] ; then
   exit 1
 fi
 
-NET_IFACE=$(ip route | grep default | awk '{print $5}')
-which apk && setup-apkrepos "${ALPINE_LATEST_STABLE}/main" "${ALPINE_LATEST_STABLE}/community" && apk add bash gnupg htop iptables rsync tmux vim wget yq
+net_iface=$(ip route | grep default | awk '{print $5}')
+alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
+which apk && setup-apkrepos "${alpine_latest_stable}/main" "${alpine_latest_stable}/community" && apk add bash gnupg htop iptables rsync tmux vim wget yq
 which apt && apt -y install bash gnupg htop iptables rsync tmux vim wget yq
 
 echo 'applying firewall rules'
 iptables -F
 iptables -X
 iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -i "${NET_IFACE}" -j DROP
+iptables -A INPUT -i "${net_iface}" -j DROP
 
 os="Alpine Linux"
 grep Ubuntu /etc/*release && os="Gentoo Linux"
@@ -128,7 +128,7 @@ case "${os}" in
         ARCH='x86_64'
         VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
 
-        latest_releases=$(wget -qO - "${ALPINE_LATEST_STABLE}/releases/${ARCH}/latest-releases.yaml")
+        latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${ARCH}/latest-releases.yaml")
         default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
 
         echo
