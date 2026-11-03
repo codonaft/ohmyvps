@@ -9,7 +9,7 @@
 ```bash
 setup-interfaces
 setup-dns 9.9.9.9 1.1.1.1
-/etc/init.d/networking start
+rc-service networking start
 ```
 
 Go to [step 3](#3-install) on success.

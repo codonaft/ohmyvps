@@ -33,8 +33,26 @@ function maybe_install_oh_my_zsh() {
   }
 }
 
+function install_rust_crate() {
+  crate="$1"
+  echo "installing ${crate}"
+  cargo install --force --locked --version "${QUICSSH_ROBUST_VERSION}" "${crate}"
+  mv ~/.cargo/bin/${crate} /mnt/usr/local/bin/
+}
+
+function sync_all() {
+  sync
+  echo 3 > /proc/sys/vm/drop_caches
+}
+
 script_dir=$(realpath "$(dirname "$0")")
 cd "${script_dir}"
+
+echo 'disable sshd'
+rc-service --ifstarted sshd stop 2>>/dev/null || :
+apk del openssh 2>>/dev/null || :
+echo -n > /etc/init.d/openssh || :
+chattr +i /etc/init.d/openssh || :
 
 echo 'disabling tiny-cloud'
 eject || :
@@ -49,7 +67,7 @@ vim config.sh
 source config.sh
 
 setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
-apk add e2fsprogs gcc musl-dev podman sfdisk sgdisk
+apk add e2fsprogs gcc musl-dev sfdisk
 
 echo "${ANSWERS}" > .answers.conf
 echo "USEROPTS='none'" >> .answers.conf
@@ -76,12 +94,17 @@ mount | grep "${TARGET_DISK}" >>/dev/null && {
 root_partition="${TARGET_DISK}1"
 [ "${FORMAT_DISK}" == 1 ] && {
   echo 'creating partition table and filesystem'
-  sgdisk --zap-all "${TARGET_DISK}"
+  for i in "${TARGET_DISK}"?* ; do
+    dd if=/dev/zero of=${i} bs=4K count=1K || :
+  done
+  dd if=/dev/zero of=${TARGET_DISK} bs=4K count=1 || :
+  sync_all
   echo 'type=83' | sfdisk "${TARGET_DISK}"
+  sync_all
+  mknod "${root_partition}" b 8 1 || :
   mkfs.ext4 -F -O "${MKFS_OPTS}" "${root_partition}"
   fdisk -l
-  sync
-  echo 3 > /proc/sys/vm/drop_caches
+  sync_all
 }
 
 # TODO: another disk
@@ -91,7 +114,6 @@ root_partition="${TARGET_DISK}1"
 # quit
 
 mount -t ext4 -o "${MOUNT_OPTS}" "${root_partition}" /mnt
-/etc/init.d/networking stop || :
 setup-alpine -e -f .answers.conf
 
 mount --rbind /dev /mnt/dev
@@ -114,13 +136,15 @@ chroot /mnt /bin/bash -s << END
 
 set -xeuo pipefail
 
+$(declare -f sync_all)
+
 mkdir -p /coredumps
 chmod 00440 /etc/sudoers
 chmod 00640 /etc/ssh/sshd_config
 chmod 00700 /coredumps
 chown root:wheel /etc/ssh/sshd_config
 
-source /etc/profile.d/99local.sh || :
+source /etc/profile.d/99local.sh 2>>/dev/null || :
 
 echo "installing packages"
 apk del doas linux-lts openssh-server-pam syslinux || :
@@ -184,7 +208,7 @@ echo 'proc /proc proc defaults,hidepid=invisible 0 0' >> /etc/fstab
 [ -e /usr/sbin/unbound ] && {
   mkdir -m 00700 -p /etc/unbound/var
   chown unbound:root /etc/unbound/var
-  sudo -u unbound unbound-anchor -v -a /etc/unbound/var/root.key
+  sudo -u unbound unbound-anchor -v -a /etc/unbound/var/root.key || :
 }
 
 [ -e /usr/sbin/nginx ] && {
@@ -228,22 +252,22 @@ git config --global user.email "root@${VPS_HOSTNAME}"
 rm -fv /etc/ssh/ssh_host_*
 sort -u < /etc/apk/repositories | grep -v 'http://' > /etc/apk/repositories || :
 
+echo 'nameserver 127.0.0.1' > /etc/resolv.conf || :
 for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
   chattr +i \$i || :
 done
 
 cd /etc
-rm -f motd
-etckeeper init
-etckeeper commit Initial
+rm -f motd || :
+etckeeper init || :
+etckeeper commit Initial || :
 cd /
 
-sync
-echo 3 > /proc/sys/vm/drop_caches
+sync_all
 cat /etc/alpine-release || :
 END
 
-echo 'building quicssh-rs-robust'
+echo 'installing rust'
 apk add --update --no-cache rustup
 rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target x86_64-unknown-linux-musl
 source ~/.cargo/env
@@ -254,11 +278,10 @@ export FCFLAGS="${CFLAGS}"
 export FFLAGS="${CFLAGS}"
 export LDFLAGS='-Wl,-z,now -Wl,-z,relro'
 export RUSTFLAGS='-C target-cpu=native -C force-frame-pointers=y'
-cargo install --force --locked --version "${QUICSSH_ROBUST_VERSION}"
-mv ~/.cargo/bin/quicssh-rs-robust /mnt/usr/local/bin/
 
-sync
-echo 3 > /proc/sys/vm/drop_caches
+install_rust_crate quicssh-rs-robust
+
+sync_all
 
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :

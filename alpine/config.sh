@@ -78,7 +78,7 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
   ntpd
   quicssh-rs-robust
   sshd
-  tinyproxy
+  #tinyproxy
   tor
   #unbound
 )

@@ -79,6 +79,9 @@ Mkc=
 =FcYC
 -----END PGP PUBLIC KEY BLOCK-----'
 
+ALPINE_MIRROR='https://dl-cdn.alpinelinux.org/alpine'
+ALPINE_LATEST_STABLE="${ALPINE_MIRROR}/latest-stable"
+
 download_and_unpack() {
   wget https://api.github.com/repos/codonaft/ohmyvps/tarball -O - | tar xzf -
 }
@@ -89,7 +92,7 @@ if [ "$(id -u)" != "0" ] ; then
 fi
 
 NET_IFACE=$(ip route | grep default | awk '{print $5}')
-which apk && setup-apkrepos -1 && sed --in-place "/^\/.*/d;s!^#http!http!;s!^http:!https:!" /etc/apk/repositories && apk add bash gnupg htop iptables rsync tmux vim wget yq
+which apk && setup-apkrepos "${ALPINE_LATEST_STABLE}/main" "${ALPINE_LATEST_STABLE}/community" && apk add bash gnupg htop iptables rsync tmux vim wget yq
 which apt && apt -y install bash gnupg htop iptables rsync tmux vim wget yq
 
 echo 'applying firewall rules'
@@ -123,13 +126,10 @@ case "${os}" in
         ;;
     "Boot Alpine Linux")
         ARCH='x86_64'
-        MIRROR="https://dl-cdn.alpinelinux.org/alpine"
-        VERSION_REQUEST='.[] | select(.title == "Virtual") | .version'
+        VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
 
-        latest_releases=$(wget -qO - "${MIRROR}/latest-stable/releases/${ARCH}/latest-releases.yaml")
-        default_version=$(yq --output-format props "${VERSION_REQUEST}" <<< "${latest_releases}")
-        [ "${default_version}" = '' ] && default_version=$(yq --raw-output "${VERSION_REQUEST}" <<< "${latest_releases}")
-        [ "${default_version}" = '' ] && default_version='3.21.3'
+        latest_releases=$(wget -qO - "${ALPINE_LATEST_STABLE}/releases/${ARCH}/latest-releases.yaml")
+        default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
 
         echo
         read -p "Version? [${default_version}] " version
@@ -139,14 +139,14 @@ case "${os}" in
 
         set -x
 
-        iso="alpine-virt-${version}-${ARCH}.iso"
-        url="${MIRROR}/v${short_version}/releases/${ARCH}/${iso}"
+        iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
+        url="${ALPINE_MIRROR}/v${short_version}/releases/${ARCH}/${iso}"
 
-        wget -c "${url}"{,.sha256,.asc}
+        wget -c "${url}" "${url}.sha256" "${url}.asc"
         sha256sum -c "${iso}.sha256"
 
         echo "${ALPINE_GPG}" | gpg --import
-        gpg --verify "${iso}"{.asc,}
+        gpg --verify "${iso}.asc" "${iso}"
 
         mount -t iso9660 "${iso}" /mnt
         cp -a /mnt/* / || :
