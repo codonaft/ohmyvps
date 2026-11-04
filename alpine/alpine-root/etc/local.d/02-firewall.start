@@ -1,60 +1,63 @@
 #!/usr/bin/env bash
 
 nft add table inet filter
-nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }'
-nft add chain inet filter output '{ type filter hook output priority 0; policy accept; }'
-nft add chain inet filter nat_output '{ type nat hook output priority -100; policy accept; }'
+nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }' || :
+nft add chain inet filter output '{ type filter hook output priority 0; policy accept; }' || :
+nft add chain inet filter nat_output '{ type nat hook output priority -100; policy accept; }' || :
 
 [ -f "${LOCAL_BANLIST}" ] && {
-  nft add set inet filter banlist4 '{ type ipv4_addr; flags interval; }'
-  nft add set inet filter banlist6 '{ type ipv6_addr; flags interval; }'
+  {
+    echo '
+      add set inet filter banlist4 { type ipv4_addr; flags interval; }
+      add set inet filter banlist6 { type ipv6_addr; flags interval; }'
 
-  for i in $(grepcidr -e '0.0.0.0/0' < "${LOCAL_BANLIST}") ; do
-    nft add element inet filter banlist4 "{ $i }"
-  done
-  for i in $(grepcidr -e '::/0' < "${LOCAL_BANLIST}") ; do
-    nft add element inet filter banlist6 "{ $i }"
-  done
+    while IFS= read -r i; do
+      echo "add element inet filter banlist4 { $i }"
+    done < <(grepcidr -e '0.0.0.0/0' < "${LOCAL_BANLIST}")
 
-  nft add rule inet filter input ip saddr @banlist4 drop
-  nft add rule inet filter input ip6 saddr @banlist6 drop
+    while IFS= read -r i; do
+      echo "add element inet filter banlist6 { $i }"
+    done < <(grepcidr -e '::/0' < "${LOCAL_BANLIST}")
+
+    echo '
+      add rule inet filter input ip saddr @banlist4 drop
+      add rule inet filter input ip6 saddr @banlist6 drop'
+  } | nft -f -
 } || touch "${LOCAL_BANLIST}"
 
 [ -f /usr/sbin/sshd ] && {
-  nft add set inet filter ssh_allow4 '{ type ipv4_addr; flags interval; }'
-  nft add set inet filter ssh_allow6 '{ type ipv6_addr; flags interval; }'
+  {
+    echo '
+      add set inet filter ssh_allow4 { type ipv4_addr; flags interval; }
+      add set inet filter ssh_allow6 { type ipv6_addr; flags interval; }'
 
-  for i in $(grepcidr -e '0.0.0.0/0' < "${SSH_ALLOWLIST}") ; do
-    nft add element inet filter ssh_allow4 "{ $i }"
-  done
-  for i in $(grepcidr -e '::/0' < "${SSH_ALLOWLIST}") ; do
-    nft add element inet filter ssh_allow6 "{ $i }"
-  done
+    grepcidr -e '0.0.0.0/0' < "${SSH_ALLOWLIST}" | awk '{ print "add element inet filter ssh_allow4 { " $0 " }" }'
+    grepcidr -e '::/0' < "${SSH_ALLOWLIST}" | awk '{ print "add element inet filter ssh_allow6 { " $0 " }" }'
 
-  nft add rule inet filter input iifname "${WAN_IFACE}" ip  saddr @ssh_allow4 tcp dport "${SSH_PORT}" accept
-  nft add rule inet filter input iifname "${WAN_IFACE}" ip  saddr @ssh_allow4 udp dport "${SSH_PORT}" accept
-  nft add rule inet filter input iifname "${WAN_IFACE}" ip6 saddr @ssh_allow6 tcp dport "${SSH_PORT}" accept
-  nft add rule inet filter input iifname "${WAN_IFACE}" ip6 saddr @ssh_allow6 udp dport "${SSH_PORT}" accept
+    echo "
+      add rule inet filter input iifname \"${WAN_IFACE}\" ip saddr @ssh_allow4 meta l4proto { tcp, udp } th dport ${SSH_PORT} accept
+      add rule inet filter input iifname \"${WAN_IFACE}\" ip6 saddr @ssh_allow6 meta l4proto { tcp, udp } th dport ${SSH_PORT} accept"
+  } | nft -f -
 }
 
 [ -f /usr/bin/tor ] && {
   VADDR4=$(grep VirtualAddrNetworkIPv4 /etc/tor/torrc | awk '{print $2}')
   VADDR6=$(grep VirtualAddrNetworkIPv6 /etc/tor/torrc | awk '{print $2}' | sed 's!\[!!;s!\]!!')
 
-  nft add rule inet filter nat_output ip  daddr "${VADDR4}" tcp redirect to :9052
+  nft add rule inet filter nat_output ip daddr "${VADDR4}" tcp redirect to :9052
   nft add rule inet filter nat_output ip6 daddr "${VADDR6}" tcp redirect to :9052
 }
 
 for i in 9.9.9.9 149.112.112.112 9.9.9.11 149.112.112.11 9.9.9.10 149.112.112.10 ; do
-  nft add rule inet filter nat_output ip  daddr "$i" tcp dport 53 dnat to "$i:9953"
-  nft add rule inet filter nat_output ip  daddr "$i" udp dport 53 dnat to "$i:9953"
+  nft add rule inet filter nat_output ip daddr "$i" tcp dport 53 dnat to "$i:9953"
+  nft add rule inet filter nat_output ip daddr "$i" udp dport 53 dnat to "$i:9953"
 done
 for i in 2620:fe::fe 2620:fe::9 2620:fe::11 2620:fe::fe:11 2620:fe::10 2620:fe::fe:10 ; do
   nft add rule inet filter nat_output ip6 daddr "$i" tcp dport 53 dnat to "[$i]:9953"
   nft add rule inet filter nat_output ip6 daddr "$i" udp dport 53 dnat to "[$i]:9953"
 done
 
-nft add rule inet filter input iifname "lo" accept
+nft add rule inet filter input iifname 'lo' accept
 nft add rule inet filter input meta l4proto tcp tcp flags != syn ct state new drop
 nft add rule inet filter input ct state invalid drop
 nft add rule inet filter input ct state established,related accept

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-nft delete table inet filter || :
 nft add table inet filter
-nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }'
-nft add chain inet filter output '{ type filter hook output priority 0; policy accept; }'
+nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }' || :
+nft add chain inet filter output '{ type filter hook output priority 0; policy accept; }' || :
+nft add chain inet filter nat_output '{ type nat hook output priority -100; policy accept; }' || :
 
 # some VPSes require incoming ICMPv6 from gateway to be allowed (perhaps Neighbor Discovery Protocol related)
 [ ! -z "${WAN_IPV6_GW}" ] && nft add rule inet filter input icmpv6 ip6 saddr "${WAN_IPV6_GW}" accept
