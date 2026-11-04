@@ -1,53 +1,44 @@
 #!/usr/bin/env bash
 
-nft add table inet filter
+source /etc/profile.d/99local.sh
+
+nft add table inet filter || :
 nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }' || :
 nft add chain inet filter output '{ type filter hook output priority 0; policy accept; }' || :
 nft add chain inet filter nat_output '{ type nat hook output priority -100; policy accept; }' || :
 
 # some VPSes require incoming ICMPv6 from gateway to be allowed (perhaps Neighbor Discovery Protocol related)
-[ ! -z "${WAN_IPV6_GW}" ] && nft add rule inet filter input icmpv6 ip6 saddr "${WAN_IPV6_GW}" accept
+[ -n "${WAN_IPV6_GW}" ] && nft add rule inet filter input ip6 saddr "${WAN_IPV6_GW}" icmpv6 accept
 
 # disallow some of the legacy unencrypted protocols
-for i in 20 21 23 25 49 69 80 109 110 119 143 161 162 194 389 513 514 5060 6667 8080 ; do
-  nft add rule inet filter output tcp dport "$i" reject
-done
-for i in 69 194 389 513 514 5060 ; do
-  nft add rule inet filter output udp dport "$i" reject
-done
+nft add rule inet filter output tcp dport '{ 20, 21, 23, 25, 49, 69, 80, 109, 110, 119, 143, 161, 162, 194, 389, 513, 514, 5060, 6667, 8080 }' reject
+nft add rule inet filter output udp dport '{ 69, 194, 389, 513, 514, 5060 }' reject
 
 ## allow DHCP
-#nft add rule inet filter input udp dport 68 accept
-#nft add rule inet filter input udp dport 546 accept
+#nft add rule inet filter input udp dport '{ 68, 546 }' accept
 
-# ratelimit ICMP
+## HE
+#nft add rule inet filter input iifname "${WAN_IFACE}" ip saddr 66.220.2.74 icmp accept
+
+# rate-limit ICMP
 nft add rule inet filter input icmp type echo-request limit rate 6/second accept
 nft add rule inet filter input icmpv6 type echo-request limit rate 6/second accept
 
-nft add rule inet filter input iifname "${WAN_IFACE}" icmp ip saddr 66.220.2.74 accept # HE
-
-{
-  grepcidr -e '0.0.0.0/0' < "${SSH_ALLOWLIST}" |
-    awk '{ print "add rule inet filter input ip saddr " $0 " icmp accept" }'
-
-  grepcidr -e '::/0' < "${SSH_ALLOWLIST}" |
-    awk '{ print "add rule inet filter input ip6 saddr " $0 " icmpv6 accept" }'
-} | nft -f -
+filter_ipv4 < "${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip saddr' 'icmp accept'
+filter_ipv6 < "${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 saddr' 'icmpv6 accept'
 
 ## allow ICMP traffic from all IPs
 #nft add rule inet filter input icmp accept
 #nft add rule inet filter input icmpv6 accept
 
-## allow connections to ssh from all non-banned IPs
+## allow all connections to ssh from non-banned IPs
 #[ -f /usr/sbin/sshd ] && {
 #  nft add rule inet filter input tcp dport "${SSH_PORT}" accept
 #}
 
 # allow HTTP/HTTPS traffic from all IPs
 [ -f /usr/sbin/nginx ] && {
-  for p in 80 443 ; do
-    nft add rule inet filter input tcp dport "$p" accept
-  done
+  nft add rule inet filter input tcp dport '{ 80, 443 }' accept
   nft add rule inet filter input udp dport 443 accept
 }
 
@@ -56,17 +47,10 @@ nft add rule inet filter input iifname "${WAN_IFACE}" icmp ip saddr 66.220.2.74 
   [ ! -f /var/tmp/cloudflare-ipv4.txt ] || [ ! -f /var/tmp/cloudflare-ipv6.txt ] && update-cloudflare-ips.sh || :
 
   [ -f /usr/sbin/nginx ] && {
-    {
-      awk '{
-        print "add rule inet filter input ip saddr " $0 " tcp dport { 80, 443 } accept"
-        print "add rule inet filter input ip saddr " $0 " udp dport 443 accept"
-      }' /var/tmp/cloudflare-ipv4.txt
-
-      awk '{
-        print "add rule inet filter input ip6 saddr " $0 " tcp dport { 80, 443 } accept"
-        print "add rule inet filter input ip6 saddr " $0 " udp dport 443 accept"
-      }' /var/tmp/cloudflare-ipv6.txt
-    } | nft -f -
+    nft_list 'add rule inet filter input ip saddr' 'tcp dport { 80, 443 } accept' < /var/tmp/cloudflare-ipv4.txt
+    nft_list 'add rule inet filter input ip saddr' 'udp dport 443 accept' < /var/tmp/cloudflare-ipv4.txt
+    nft_list 'add rule inet filter input ip6 saddr' 'tcp dport { 80, 443 } accept' < /var/tmp/cloudflare-ipv6.txt
+    nft_list 'add rule inet filter input ip6 saddr' 'udp dport 443 accept' < /var/tmp/cloudflare-ipv6.txt
   }
 } &
 
@@ -75,13 +59,8 @@ nft add rule inet filter input iifname "${WAN_IFACE}" icmp ip saddr 66.220.2.74 
   [ ! -f /var/tmp/google-googlebot-ipv4.txt ] && update-google-ips.sh || :
   [ ! -f /var/tmp/bots-amazon-ipv4.txt ] && update-bot-ips.sh || :
 
-  {
-    sort -u /var/tmp/{google,bots}-*-ipv4.txt |
-      awk '{ print "add rule inet filter input ip saddr " $0 " drop" }'
-
-    sort -u /var/tmp/{google,bots}-*-ipv6.txt |
-      awk '{ print "add rule inet filter input ip6 saddr " $0 " drop" }'
-  } | nft -f -
+  sort -u /var/tmp/{google,bots}-*-ipv4.txt | nft_list 'add rule inet filter input ip saddr' 'drop'
+  sort -u /var/tmp/{google,bots}-*-ipv6.txt | nft_list 'add rule inet filter input ip6 saddr' 'drop'
 } &
 
 [ -f /usr/bin/tor ] && {

@@ -14,7 +14,6 @@ export ADMIN_GROUP='wheel'
 
 export LOCAL_BANLIST='/var/tmp/local-banlist.txt'
 export DNS_BANLIST='/var/tmp/dns-banlist.txt'
-export SSH_BANLIST='/etc/ssh/banlist.txt'
 export SSH_ALLOWLIST='/etc/ssh/allowlist.txt'
 
 export SSH_PORT=$( ( grep -E '^Port\s*[0-9]*$' /etc/ssh/sshd_config || echo 'Port 22' ) | awk '{print $2}' | head -n1 )
@@ -33,3 +32,25 @@ export UNBOUND_DNS_PORT=$(grep -o '^\s*interface:.*@[0-9]*' /etc/unbound/unbound
 
 export NGINX_CLOUDFLARE_CONF='/etc/nginx/cloudflare.conf'
 export NGINX_ALLOWLIST_CONF='/etc/nginx/allowlist.conf'
+
+nft_list () {
+  start="$1"
+  end="$2"
+  {
+    echo -n "${start} {"
+    paste -sd ',' | tr -d '\n'
+    echo "} ${end}"
+  } | nft -f - || :
+}
+
+filter_no_comment () {
+  grep -v '^\s*#'
+}
+
+filter_ipv4 () {
+  filter_no_comment | grepcidr -e '0.0.0.0/0'
+}
+
+filter_ipv6 () {
+  filter_no_comment | grepcidr -e '::/0'
+}

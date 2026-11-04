@@ -168,7 +168,7 @@ done
 
 which vim && ln -sf /usr/bin/vim /usr/local/bin/vi
 
-touch \${LOCAL_BANLIST} \${DNS_BANLIST} \${SSH_BANLIST} \${SSH_ALLOWLIST}
+touch \${LOCAL_BANLIST} \${DNS_BANLIST} \${SSH_ALLOWLIST}
 for i in ${SSH_ALLOWED_IPS[@]} ; do
   echo "\$i" >>\${SSH_ALLOWLIST}
 done
