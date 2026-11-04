@@ -67,7 +67,7 @@ vim config.sh
 source config.sh
 
 setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
-apk add e2fsprogs gcc musl-dev sfdisk
+apk add coreutils e2fsprogs gcc musl-dev sfdisk
 
 echo "${ANSWERS}" >.answers.conf
 echo "USEROPTS='none'" >>.answers.conf
@@ -94,14 +94,23 @@ mount | grep "${TARGET_DISK}" >>/dev/null && {
 root_partition="${TARGET_DISK}1"
 [ "${FORMAT_DISK}" == 1 ] && {
   echo 'creating partition table and filesystem'
+
+  [ -e "${root_partition}" ] && read -r major minor < <(stat -c '%Hr %Lr' "${root_partition}")
+
   for i in "${TARGET_DISK}"?* ; do
     dd if=/dev/zero of=${i} bs=4K count=1K || :
   done
   dd if=/dev/zero of=${TARGET_DISK} bs=4K count=1 || :
   sync_all
+
   echo 'type=83' | sfdisk "${TARGET_DISK}"
   sync_all
-  mknod "${root_partition}" b 8 1 || :
+
+  [ ! -e "${root_partition}" ] && [ -n "${major}" ] && [ -n "${minor}" ] && {
+    mknod -m 660 "${root_partition}" b "${major}" "${minor}"
+    chown root:disk "${root_partition}"
+  }
+
   mkfs.ext4 -F -O "${MKFS_OPTS}" "${root_partition}"
   fdisk -l
   sync_all
@@ -269,7 +278,7 @@ apk add --update --no-cache rustup
 rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target x86_64-unknown-linux-musl
 source ~/.cargo/env
 rustc --print target-cpus | grep native | sed 's/.* (currently //;s/)\.//' >/mnt/etc/target-cpu
-export CFLAGS='-march=native -O3 -mno-rdrnd -fstack-protector-all -fstack-clash-protection'
+export CFLAGS='-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always'
 export CXXFLAGS="${CFLAGS}"
 export FCFLAGS="${CFLAGS}"
 export FFLAGS="${CFLAGS}"
