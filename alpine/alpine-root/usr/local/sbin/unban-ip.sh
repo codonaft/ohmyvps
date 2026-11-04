@@ -8,4 +8,5 @@ fi
 ip="$1"
 [ -e "${SSH_BANLIST}" ] && sed --in-place "/^${ip}$/d" "${SSH_BANLIST}"
 
-iptables -D INPUT -p tcp --source "${ip}" --dport "${SSH_PORT}" -j DROP
+nft add rule inet filter input ip saddr "${ip}" tcp dport "${SSH_PORT}" drop || \
+  nft add rule inet filter input ip6 saddr "${ip}" tcp dport "${SSH_PORT}" drop || :

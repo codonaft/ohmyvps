@@ -90,16 +90,17 @@ if [ "$(id -u)" != '0' ] ; then
   exit 1
 fi
 
-net_iface=$(ip route | grep default | awk '{print $5}')
+wan_iface=$(ip route | grep default | awk '{print $5}')
 alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
-which apk && setup-apkrepos "${alpine_latest_stable}/main" "${alpine_latest_stable}/community" && apk add bash gnupg htop iptables rsync tmux vim wget yq
-which apt && apt -y install bash gnupg htop iptables rsync tmux vim wget yq
+which apk && setup-apkrepos "${alpine_latest_stable}/main" "${alpine_latest_stable}/community" && apk add bash gnupg htop nftables rsync tmux vim wget yq
+which apt && apt -y install bash gnupg htop nftables rsync tmux vim wget yq
 
 echo 'applying firewall rules'
-iptables -F
-iptables -X
-iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -i "${net_iface}" -j DROP
+nft flush ruleset
+nft add table inet filter
+nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }'
+nft add rule inet filter input ct state related,established accept
+nft add rule inet filter input iifname "${wan_iface}" drop
 
 BOOT_ALPINE='Boot Alpine'
 INSTALL_ALPINE='Install Alpine'

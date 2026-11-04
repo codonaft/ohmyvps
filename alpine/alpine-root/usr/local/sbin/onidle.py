@@ -14,7 +14,7 @@ MAX_SSH_ALLOWLIST_BANDWIDTH_BYTES_PER_SEC = 50 * 1024
 CRITIAL_PROCESSES = {'apk', 'fstrim', 'logrotate', 'rsync'}
 
 SSH_ALLOWLIST = environ['SSH_ALLOWLIST']
-NET_IFACE = environ['NET_IFACE']
+WAN_IFACE = environ['WAN_IFACE']
 
 PRE_MESSAGE = path.splitext(path.basename(sys.argv[0]))[0] + ':'
 PRINTED_MESSAGES = set()
@@ -53,7 +53,7 @@ def bandwidth():
         nets = (net for net in open(SSH_ALLOWLIST).readlines() if len(net.strip()) > 0)
         pattern = ' or '.join(f'net {net}' for net in nets)
         timeout_secs = BANDWIDTH_DELTA_TIME.seconds
-        tshark = getoutput(f'timeout {timeout_secs}s tshark -i {NET_IFACE} -f "({pattern}) and (tcp or udp)" -T fields -e frame.len 2>>/dev/null').split('\n')
+        tshark = getoutput(f'timeout {timeout_secs}s tshark -i {WAN_IFACE} -f "({pattern}) and (tcp or udp)" -T fields -e frame.len 2>>/dev/null').split('\n')
         return sum(int(i) for i in tshark if len(i) > 0) // timeout_secs
     except Exception as e:
         info(e)

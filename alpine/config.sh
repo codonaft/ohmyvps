@@ -50,6 +50,7 @@ export WORLD_PACKAGES=(
   #lyrebird
   mtr
   ncdu
+  nftables
   #nginx-mod-http-brotli
   #nginx
   podman
