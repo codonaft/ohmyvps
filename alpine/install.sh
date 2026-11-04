@@ -125,7 +125,6 @@ mount --rbind /proc /mnt/proc
 sed --in-place 's!^default_kernel_opts="quiet \(.*\)"$!default_kernel_opts="\1 random.trust_cpu=off init_on_free=1 init_on_alloc=1"!g;s!^default=.*$!default=virt!' /mnt/etc/update-extlinux.conf # affects grub as well
 sed --in-place "s!^#Port 22!Port ${SSH_PORT}!;s!^#PasswordAuthentication yes!PasswordAuthentication no!;s!^AllowTcpForwarding no!AllowTcpForwarding yes!" /mnt/etc/ssh/sshd_config
 [ "${SSH_ALLOW_TCP}" = '0' ] && sed --in-place 's!^#ListenAddress 0\.0\.0\.0!ListenAddress 127.0.0.1!;s!^#ListenAddress ::!ListenAddress ::1!' /mnt/etc/ssh/sshd_config
-sed --in-place "/^\/.*/d;s!^#http!http!;s!^http:!https:!" /mnt/etc/apk/repositories || :
 sed --in-place "s!\s*ext4\s*rw,relatime\s*!\text4\t${MOUNT_OPTS} !" /mnt/etc/fstab || :
 
 echo "entering chroot"
@@ -246,7 +245,6 @@ git config --global user.name "root"
 git config --global user.email "root@${VPS_HOSTNAME}"
 
 rm -fv /etc/ssh/ssh_host_*
-sort -u < /etc/apk/repositories | grep -v 'http://' > /etc/apk/repositories || :
 
 echo 'nameserver 127.0.0.1' > /etc/resolv.conf || :
 for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
@@ -262,6 +260,9 @@ cd /
 sync_all
 cat /etc/alpine-release || :
 END
+
+cp /etc/apk/repositories /mnt/etc/apk/repositories
+chattr +i /mnt/etc/apk/repositories
 
 echo 'installing rust'
 apk add --update --no-cache rustup

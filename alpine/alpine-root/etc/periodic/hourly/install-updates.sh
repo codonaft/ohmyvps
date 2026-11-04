@@ -34,14 +34,13 @@ for i in "${APKS[@]}" ; do
 done
 
 eject || :
-setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
 apk add --no-cache --upgrade apk-tools 2>>/dev/stdout | logger || :
 apk upgrade --no-cache 2>>/dev/stdout | logger
 apk del doas linux-lts openssh-server-pam syslinux tiny-cloud-alpine tiny-cloud || :
 rm -f /etc/motd
 
 for i in $(grep ':/bin/zsh$' /etc/passwd | cut -d ':' -f1) ; do
-  su "$i" -c 'source ~/.zshrc && echo | omz update' 2>>/dev/stdout | logger || :
+  su "$i" -c 'source ~/.zshrc && echo | omz update' >>/dev/null 2>>/dev/stdout | logger || :
 done
 
 sync
