@@ -20,7 +20,7 @@ write() {
   target="$3"
   output="${PATH_PREFIX}-${target}-ipv${version}.txt"
   temp="${output}.tmp"
-  grepcidr -e "${cidr}" | sort -u > "${temp}"
+  grepcidr -e "${cidr}" | sort -u >"${temp}"
   [ "$(stat --format='%s' ${temp})" -gt 1 ] && mv "${temp}" "${output}"
 }
 

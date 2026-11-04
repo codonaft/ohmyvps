@@ -107,7 +107,7 @@ INSTALL_ALPINE='Install Alpine'
 INSTALL_GENTOO='Install Gentoo'
 
 clear
-if grep Ubuntu /etc/*release >> /dev/null ; then
+if grep Ubuntu /etc/*release >>/dev/null ; then
   echo "1. ${BOOT_ALPINE}"
   echo "2. ${INSTALL_GENTOO}"
 else
@@ -120,7 +120,7 @@ default_choice='1'
 read -p "What's next? [${default_choice}] " choice
 choice="${choice:-${default_choice}}"
 
-if grep Ubuntu /etc/*release >> /dev/null ; then
+if grep Ubuntu /etc/*release >>/dev/null ; then
   action="${BOOT_ALPINE}"
   [ "${choice}" = 2 ] && action="${INSTALL_GENTOO}"
 else
@@ -129,59 +129,59 @@ else
 fi
 
 case "${action}" in
-    "${BOOT_ALPINE}")
-        ARCH='x86_64'
-        VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
+  "${BOOT_ALPINE}")
+    ARCH='x86_64'
+    VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
 
-        latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${ARCH}/latest-releases.yaml")
-        default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
+    latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${ARCH}/latest-releases.yaml")
+    default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
 
-        echo
-        read -p "Version? [${default_version}] " version
-        echo
-        version=${version:-${default_version}}
-        short_version=$(echo ${version} | sed 's!\.[0-9]*$!!')
+    echo
+    read -p "Version? [${default_version}] " version
+    echo
+    version=${version:-${default_version}}
+    short_version=$(echo ${version} | sed 's!\.[0-9]*$!!')
 
-        set -x
+    set -x
 
-        iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
-        url="${ALPINE_MIRROR}/v${short_version}/releases/${ARCH}/${iso}"
+    iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
+    url="${ALPINE_MIRROR}/v${short_version}/releases/${ARCH}/${iso}"
 
-        wget -c "${url}" "${url}.sha256" "${url}.asc"
-        sha256sum -c "${iso}.sha256"
+    wget -c "${url}" "${url}.sha256" "${url}.asc"
+    sha256sum -c "${iso}.sha256"
 
-        echo "${ALPINE_GPG}" | gpg --import
-        gpg --verify "${iso}.asc" "${iso}"
+    echo "${ALPINE_GPG}" | gpg --import
+    gpg --verify "${iso}.asc" "${iso}"
 
-        mount -t iso9660 "${iso}" /mnt
-        cp -a /mnt/* / || :
-        cp -a /mnt/* /boot/ || : # in case if you have a separate /boot partition and the rest of stuff on LVM
-        umount /mnt
+    mount -t iso9660 "${iso}" /mnt
+    cp -a /mnt/* / || :
+    cp -a /mnt/* /boot/ || : # in case if you have a separate /boot partition and the rest of stuff on LVM
+    umount /mnt
 
-        find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
-        echo '#!/bin/sh
-          cat << EOF
-          menuentry "Alpine Linux" --unrestricted {
-            linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1
-            initrd /boot/initramfs-virt
-          }
-          EOF' > /etc/grub.d/99_custom
-        chmod +x /etc/grub.d/99_custom
-        update-grub
-        grub-reboot 'Alpine Linux'
+    find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
+    echo '#!/bin/sh
+      cat << EOF
+      menuentry "Alpine Linux" --unrestricted {
+        linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1
+        initrd /boot/initramfs-virt
+      }
+      EOF' > /etc/grub.d/99_custom
+    chmod +x /etc/grub.d/99_custom
+    update-grub
+    grub-reboot 'Alpine Linux'
 
-        sync
-        echo 3 > /proc/sys/vm/drop_caches
-        reboot
-        ;;
-    "${INSTALL_ALPINE}")
-        download_and_unpack
-        *ohmyvps*/alpine/install.sh
-        ;;
-    "${INSTALL_GENTOO}")
-        download_and_unpack
-        *ohmyvps*/gentoo/01-run-tmux.sh
-        ;;
-    *)
-        ;;
+    sync
+    echo 3 > /proc/sys/vm/drop_caches
+    reboot
+    ;;
+  "${INSTALL_ALPINE}")
+    download_and_unpack
+    *ohmyvps*/alpine/install.sh
+    ;;
+  "${INSTALL_GENTOO}")
+    download_and_unpack
+    *ohmyvps*/gentoo/01-run-tmux.sh
+    ;;
+  *)
+    ;;
 esac

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ps uax | grep '/emerge ' | grep -v grep >> /dev/null && exit 0
+ps uax | grep '/emerge ' | grep -v grep >>/dev/null && exit 0
 #emaint sync --allrepos
 emerge --sync
 emerge --regen

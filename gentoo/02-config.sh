@@ -127,23 +127,23 @@ post_emerge_packages() {
     hourly="/etc/cron.hourly"
     mkdir -p "${hourly}"
     cron_script="${hourly}/ntpdate"
-    echo '#!/usr/bin/env bash' > "${cron_script}"
-    echo '' >> "${cron_script}"
-    echo "ntpdate -s -t60 ${fastest_ntp_server_ips}&& hwclock --systohc && logger 'time has been updated' || /etc/init.d/ntp-client restart" >> "${cron_script}"
+    echo '#!/usr/bin/env bash' >"${cron_script}"
+    echo '' >>"${cron_script}"
+    echo "ntpdate -s -t60 ${fastest_ntp_server_ips}&& hwclock --systohc && logger 'time has been updated' || /etc/init.d/ntp-client restart" >>"${cron_script}"
     chmod +x "${cron_script}"
   }
 
-  [ -e /etc/containers/registries.conf ] && echo 'unqualified-search-registries = ["docker.io"]' >> /etc/containers/registries.conf
+  [ -e /etc/containers/registries.conf ] && echo 'unqualified-search-registries = ["docker.io"]' >>/etc/containers/registries.conf
 
   mkdir -p -m 00000 "/home/${USERNAME}/tmp"
-  echo "tmpfs /home/${USERNAME}/tmp tmpfs nosuid,nodev,mode=1700,uid=1000,gid=1000,size=128M 0 0" >> /etc/fstab
+  echo "tmpfs /home/${USERNAME}/tmp tmpfs nosuid,nodev,mode=1700,uid=1000,gid=1000,size=128M 0 0" >>/etc/fstab
 
   maybe_install_oh_my_zsh
 
   # touch /forcefsck
   # chattr +i /forcefsck
   #
-  # echo 'nameserver 127.0.0.1' > /etc/resolv.conf
+  # echo 'nameserver 127.0.0.1' >/etc/resolv.conf
   # chattr +i /etc/resolv.conf
 }
 

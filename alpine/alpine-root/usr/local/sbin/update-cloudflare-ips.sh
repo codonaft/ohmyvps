@@ -26,7 +26,7 @@ download() {
   temp="${output}.tmp"
   ( get "https://www.cloudflare.com/ips-v${version}" ; get "https://raw.githubusercontent.com/lord-alfred/ipranges/main/cloudflare/ipv${version}_merged.txt" ) | \
     grepcidr -e "${cidr}" | \
-    sort -u > "${temp}"
+    sort -u >"${temp}"
   [ "$(stat --format='%s' ${temp})" -gt 1 ] && mv "${temp}" "${output}"
 }
 
@@ -37,6 +37,6 @@ after=$(sum)
 
 [ "${before}" != "${after}" ] && {
   temp="${NGINX_CLOUDFLARE_CONF}.tmp"
-  load | sed 's!^!set_real_ip_from !;s!$!;!' > "${temp}"
+  load | sed 's!^!set_real_ip_from !;s!$!;!' >"${temp}"
   mv "${temp}" "${NGINX_CLOUDFLARE_CONF}"
 } || exit 1

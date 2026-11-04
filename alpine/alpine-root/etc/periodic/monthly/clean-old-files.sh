@@ -15,7 +15,7 @@ done
 which flatpak && flatpak uninstall --unused --noninteractive
 
 # keep currently installed packages only
-apk cache -v sync 2>> /dev/stdout | logger
+apk cache -v sync 2>>/dev/stdout | logger
 
 # remove at least 30 days old non-dot files/directories
 find /coredumps/ /home/*/Downloads/ -mindepth 1 -not -path '*/.*' -mtime +30 -exec rm -fr {} +

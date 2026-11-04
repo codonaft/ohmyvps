@@ -38,7 +38,7 @@ write() {
   target="$3"
   output=$(path "${version}" "${target}")
   temp="${output}.tmp"
-  grepcidr -e "${cidr}" | sort -u > "${temp}"
+  grepcidr -e "${cidr}" | sort -u >"${temp}"
   [ "$(stat --format='%s' ${temp})" -gt 1 ] && mv "${temp}" "${output}"
 }
 

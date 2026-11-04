@@ -42,16 +42,16 @@ function install_rust_crate() {
 
 function sync_all() {
   sync
-  echo 3 > /proc/sys/vm/drop_caches
+  echo 3 >/proc/sys/vm/drop_caches
 }
 
 script_dir=$(realpath "$(dirname "$0")")
 cd "${script_dir}"
 
 echo 'disable sshd'
-rc-service --ifstarted sshd stop 2>> /dev/null || :
-apk del openssh 2>> /dev/null || :
-echo -n > /etc/init.d/openssh || :
+rc-service --ifstarted sshd stop 2>>/dev/null || :
+apk del openssh 2>>/dev/null || :
+echo -n >/etc/init.d/openssh || :
 chattr +i /etc/init.d/openssh || :
 
 echo 'disabling tiny-cloud'
@@ -69,12 +69,12 @@ source config.sh
 setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
 apk add e2fsprogs gcc musl-dev sfdisk
 
-echo "${ANSWERS}" > .answers.conf
-echo "USEROPTS='none'" >> .answers.conf
-echo "APKREPOSOPTS='$(cat /etc/apk/repositories)'" >> .answers.conf
-echo "INTERFACESOPTS='$(cat /etc/network/interfaces)'" >> .answers.conf
+echo "${ANSWERS}" >.answers.conf
+echo "USEROPTS='none'" >>.answers.conf
+echo "APKREPOSOPTS='$(cat /etc/apk/repositories)'" >>.answers.conf
+echo "INTERFACESOPTS='$(cat /etc/network/interfaces)'" >>.answers.conf
 
-mount | grep "${TARGET_DISK}" >> /dev/null && {
+mount | grep "${TARGET_DISK}" >>/dev/null && {
   echo 'target disk is mounted, fixing it'
   disk_file=$(basename "${TARGET_DISK}")
   cp -r /.modloop /root/
@@ -86,7 +86,7 @@ mount | grep "${TARGET_DISK}" >> /dev/null && {
   done
 }
 
-mount | grep "${TARGET_DISK}" >> /dev/null && {
+mount | grep "${TARGET_DISK}" >>/dev/null && {
   echo "${TARGET_DISK} is still mounted?"
   exit 1
 }
@@ -141,7 +141,7 @@ chmod 00640 /etc/ssh/sshd_config
 chmod 00700 /coredumps
 chown root:wheel /etc/ssh/sshd_config
 
-source /etc/profile.d/99local.sh 2>> /dev/null || :
+source /etc/profile.d/99local.sh 2>>/dev/null || :
 
 echo "installing packages"
 apk del doas linux-lts openssh-server-pam syslinux || :
@@ -161,7 +161,7 @@ which vim && ln -sf /usr/bin/vim /usr/local/bin/vi
 
 touch \${LOCAL_BANLIST} \${DNS_BANLIST} \${SSH_BANLIST} \${SSH_ALLOWLIST}
 for i in ${SSH_ALLOWED_IPS[@]} ; do
-  echo "\$i" >> \${SSH_ALLOWLIST}
+  echo "\$i" >>\${SSH_ALLOWLIST}
 done
 
 echo "setting up users"
@@ -172,7 +172,7 @@ usermod -p '*' "${USERNAME}"
 
 echo "setting podman stuff"
 for i in /etc/sub{u,g}id ; do
-  echo "${USERNAME}:100000:65536" > "\$i"
+  echo "${USERNAME}:100000:65536" >"\$i"
 done
 
 echo "changing shells"
@@ -196,9 +196,9 @@ su - "${USERNAME}" -c '$(declare -f maybe_install_oh_my_zsh) ; maybe_install_oh_
 
 echo 'update mount points'
 mkdir -p -m 00000 /root/tmp /home/${USERNAME}/tmp
-echo 'tmpfs /root/tmp tmpfs nosuid,nodev,mode=1700,uid=0,gid=0,size=128M 0 0' >> /etc/fstab
-echo 'tmpfs /home/${USERNAME}/tmp tmpfs nosuid,nodev,mode=1700,uid=1000,gid=1000,size=128M 0 0' >> /etc/fstab
-echo 'proc /proc proc defaults,hidepid=invisible 0 0' >> /etc/fstab
+echo 'tmpfs /root/tmp tmpfs nosuid,nodev,mode=1700,uid=0,gid=0,size=128M 0 0' >>/etc/fstab
+echo 'tmpfs /home/${USERNAME}/tmp tmpfs nosuid,nodev,mode=1700,uid=1000,gid=1000,size=128M 0 0' >>/etc/fstab
+echo 'proc /proc proc defaults,hidepid=invisible 0 0' >>/etc/fstab
 
 [ -e /usr/sbin/unbound ] && {
   mkdir -m 00700 -p /etc/unbound/var
@@ -246,7 +246,7 @@ git config --global user.email "root@${VPS_HOSTNAME}"
 
 rm -fv /etc/ssh/ssh_host_*
 
-echo 'nameserver 127.0.0.1' > /etc/resolv.conf || :
+echo 'nameserver 127.0.0.1' >/etc/resolv.conf || :
 for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
   chattr +i \$i || :
 done
@@ -268,7 +268,7 @@ echo 'installing rust'
 apk add --update --no-cache rustup
 rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target x86_64-unknown-linux-musl
 source ~/.cargo/env
-rustc --print target-cpus | grep native | sed 's/.* (currently //;s/)\.//' > /mnt/etc/target-cpu
+rustc --print target-cpus | grep native | sed 's/.* (currently //;s/)\.//' >/mnt/etc/target-cpu
 export CFLAGS='-march=native -O3 -mno-rdrnd -fstack-protector-all -fstack-clash-protection'
 export CXXFLAGS="${CFLAGS}"
 export FCFLAGS="${CFLAGS}"

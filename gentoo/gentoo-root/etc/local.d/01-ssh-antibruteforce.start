@@ -28,7 +28,7 @@
         while IFS=$'\n\t' read ip ; do
             is-allowed.py "${ip}" < "${ALLOWLIST}" && logger "ignoring allowed IP ${ip}" || {
                 logger "banning IP ${ip}"
-                echo "${ip}" >> "${BANLIST}"
+                echo "${ip}" >>"${BANLIST}"
                 ban "${ip}"
             }
         done

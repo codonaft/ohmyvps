@@ -34,7 +34,7 @@ enable_log() {
   touch "$1"
   chown root:root "$1"
   chmod 600 "$1"
-  exec &> >(tee -a >(sed "s/^/$(date +'%Y-%m-%d %H:%M:%S') /" >> "$1"))
+  exec &> >(tee -a >(sed "s/^/$(date +'%Y-%m-%d %H:%M:%S') /" >>"$1"))
 }
 
 log() {
@@ -172,13 +172,13 @@ rsync --remove-source-files -av /gentoo-root/etc/portage/ /etc/portage/ || :
 grep -q CPU_FLAGS_X86 /etc/portage/make.conf || {
   cpu_flags_x86="\$(cpuid2cpuflags | sed 's!.*: !!;s!rdrand!!g')"
   log "setting CPU_FLAGS_X86 to \${cpu_flags_x86}"
-  echo >> /etc/portage/make.conf
-  echo "CPU_FLAGS_X86=\"\${cpu_flags_x86}\"" >> /etc/portage/make.conf
+  echo >>/etc/portage/make.conf
+  echo "CPU_FLAGS_X86=\"\${cpu_flags_x86}\"" >>/etc/portage/make.conf
 }
 
-echo -n > /etc/ssh/allowlist.txt
+echo -n >/etc/ssh/allowlist.txt
 for i in ${SSH_ALLOWED_IPS[@]} ; do
-  echo "\$i" >> /etc/ssh/allowlist.txt
+  echo "\$i" >>/etc/ssh/allowlist.txt
 done
 
 log "migrating from legacy split-usr to merge-usr"
@@ -191,8 +191,8 @@ eselect profile set "${PORTAGE_PROFILE}"
 
 log "emerging basic packages"
 mkdir -p /etc/portage/package.accept_keywords /etc/portage/package.use
-grep -q ${KERNEL_SOURCES} /etc/portage/package.accept_keywords/* || echo '${KERNEL_SOURCES} ~*' >> /etc/portage/package.accept_keywords/package.accept_keywords
-grep -q ${KERNEL_SOURCES} /etc/portage/package.use/* || echo '${KERNEL_SOURCES} symlink' >> /etc/portage/package.use/package.use
+grep -q ${KERNEL_SOURCES} /etc/portage/package.accept_keywords/* || echo '${KERNEL_SOURCES} ~*' >>/etc/portage/package.accept_keywords/package.accept_keywords
+grep -q ${KERNEL_SOURCES} /etc/portage/package.use/* || echo '${KERNEL_SOURCES} symlink' >>/etc/portage/package.use/package.use
 emerge --autounmask-write=n ${KERNEL_SOURCES} dev-vcs/git::gentoo sys-apps/etckeeper::gentoo app-eselect/eselect-repository::gentoo sys-boot/lilo::gentoo
 log "emerging basic packages ok"
 
@@ -249,7 +249,7 @@ chmod 600 /etc/ssh/*_key || :
 [ -e /etc/conf.d/hostname ] && sed --in-place 's!HOSTNAME_WILL_BE_AUTOMATICALLY_REPLACED!${VPS_HOSTNAME}!g' /etc/conf.d/hostname
 
 for i in /mnt/etc/sub{u,g}id ; do
-  echo '${USERNAME}:100000:65536' > "\$i"
+  echo '${USERNAME}:100000:65536' >"\$i"
 done
 
 ln -s /etc/init.d/net.lo /etc/init.d/net.${NET_IFACE}
@@ -337,7 +337,7 @@ chattr +i /root/.config/htop/htoprc || :
 
 rm -v /$(basename "${stage3_url}")*
 sync
-echo 3 > /proc/sys/vm/drop_caches
+echo 3 >/proc/sys/vm/drop_caches
 END
 
 log "unmounting"
