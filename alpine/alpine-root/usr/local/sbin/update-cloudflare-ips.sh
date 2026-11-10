@@ -16,7 +16,7 @@ sum() {
 
 get() {
   url="$1"
-  sudo -u nobody wget --timeout=30 --tries=10 -qO - "${url}" | grep -vE '^#'
+  sudo -u nobody wget --timeout=30 --tries=10 -qO - "${url}" | grep -v '^\s*#'
 }
 
 download() {

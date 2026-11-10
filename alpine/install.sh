@@ -220,6 +220,7 @@ echo 'proc /proc proc defaults,hidepid=invisible 0 0' >>/etc/fstab
   chown nginx:nginx /var/lib/nginx/logs/{access,error}.log
   mkdir -m 00500 -p /etc/nginx/ssl -p /etc/nginx/ssl/selfsigned
   wget -qO /etc/nginx/ssl/dh2048.pem https://ssl-config.mozilla.org/ffdhe2048.txt
+  echo '2ef7758563185ad0dc1dbc38ab3a91647701e3ebee344fcf86b52e643bacb721  /etc/nginx/ssl/dh2048.pem' | sha256sum -c
 
   openssl genpkey -algorithm ed25519 -out /etc/nginx/ssl/selfsigned/example.com.key
   openssl req -x509 -nodes -days 36500 \

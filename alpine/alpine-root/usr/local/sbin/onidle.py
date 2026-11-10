@@ -38,7 +38,7 @@ def is_nginx_config_valid():
 
 def is_nginx_active():
     try:
-        grep = getoutput(f"grep -EoR 'access_log\\s*\\/.*;' /etc/nginx/").split('\n')
+        grep = getoutput(f"grep -EoR 'access_log\\s*\\/.*;' /etc/nginx/ 2>>/dev/null").split('\n')
         nginx_logs = set(i.split(':', 1)[1].split('access_log', 1)[1].strip().split()[0].strip() for i in grep)
         nginx_logs_pattern = ' '.join(nginx_logs)
         tail = getoutput(f"tail --lines=100 {nginx_logs_pattern} | grep -E ' HTTP/[0-9.]{{1,}}\" 200 ' | grep -Eo '(\\[.*\\])'").split('\n')
