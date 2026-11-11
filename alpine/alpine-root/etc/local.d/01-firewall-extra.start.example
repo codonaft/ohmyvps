@@ -24,8 +24,8 @@ nft add rule inet filter output udp dport '{ 69, 194, 389, 513, 514, 5060 }' rej
 nft add rule inet filter input icmp type echo-request limit rate 6/second accept
 nft add rule inet filter input icmpv6 type echo-request limit rate 6/second accept
 
-filter_ipv4 < "${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip saddr' 'icmp accept'
-filter_ipv6 < "${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 saddr' 'icmpv6 accept'
+filter_ipv4 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip saddr' 'icmp accept'
+filter_ipv6 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 saddr' 'icmpv6 accept'
 
 ## allow ICMP traffic from all IPs
 #nft add rule inet filter input icmp accept
@@ -47,10 +47,10 @@ filter_ipv6 < "${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 sadd
   [ ! -f /var/tmp/cloudflare-ipv4.txt ] || [ ! -f /var/tmp/cloudflare-ipv6.txt ] && update-cloudflare-ips.sh || :
 
   [ -f /usr/sbin/nginx ] && {
-    nft_list 'add rule inet filter input ip saddr' 'tcp dport { 80, 443 } accept' < /var/tmp/cloudflare-ipv4.txt
-    nft_list 'add rule inet filter input ip saddr' 'udp dport 443 accept' < /var/tmp/cloudflare-ipv4.txt
-    nft_list 'add rule inet filter input ip6 saddr' 'tcp dport { 80, 443 } accept' < /var/tmp/cloudflare-ipv6.txt
-    nft_list 'add rule inet filter input ip6 saddr' 'udp dport 443 accept' < /var/tmp/cloudflare-ipv6.txt
+    nft_list 'add rule inet filter input ip saddr' 'tcp dport { 80, 443 } accept' </var/tmp/cloudflare-ipv4.txt
+    nft_list 'add rule inet filter input ip saddr' 'udp dport 443 accept' </var/tmp/cloudflare-ipv4.txt
+    nft_list 'add rule inet filter input ip6 saddr' 'tcp dport { 80, 443 } accept' </var/tmp/cloudflare-ipv6.txt
+    nft_list 'add rule inet filter input ip6 saddr' 'udp dport 443 accept' </var/tmp/cloudflare-ipv6.txt
   }
 } &
 

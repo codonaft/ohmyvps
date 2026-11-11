@@ -45,7 +45,7 @@ done
 
 sync
 echo 3 > /proc/sys/vm/drop_caches
-for i in $(grep -E '^/dev' < /proc/mounts | awk '{print $2}') ; do
+for i in $(grep -E '^/dev' </proc/mounts | awk '{print $2}') ; do
   [ $(date +%u) = 2 ] && logger 'running fstrim' && fstrim -v "$i" 2>>/dev/stdout | logger || :
 done
 

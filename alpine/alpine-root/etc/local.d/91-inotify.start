@@ -22,15 +22,16 @@ inotifywait --event close_write,moved_to,create --monitor --recursive /etc/local
 inotifywait --event close_write,moved_to,create --monitor --recursive /etc/conf.d/ |
   while read -r directory events filename ; do
     [ -f "/etc/init.d/${filename}" ] && \
-      grep --extended-regexp '(^| )'${filename}'($| )' <<< "${allowed_services}" >>/dev/null && \
+      grep --extended-regexp '(^| )'${filename}'($| )' <<<"${allowed_services}" >>/dev/null && \
       ( rc-service --ifstarted "${filename}" reload || apply_deduplicated restart "${filename}" 10s ) 2>>/dev/stdout | \
         logger -t "${tag}"
   done &
 
 inotifywait --event close_write,moved_to,create --monitor --recursive /var/tmp/ |
   while read -r directory events filename ; do
-    if [[ "${filename}" == "${LOCAL_BANLIST}" ]] ; then
-      reload-local-banlist.sh
+    if [[ "${filename}" == "$(basename ${LOCAL_BANLIST})" ]] ; then
+      sleep 5s
+      grow-allow-and-ban-lists.sh
     fi
   done &
 
@@ -57,9 +58,11 @@ inotifywait --event close_write,moved_to,create --monitor --recursive /var/tmp/ 
 
 [ -f /etc/init.d/sshd ] && inotifywait --event close_write,moved_to,create --monitor --recursive /etc/ssh/ |
   while read -r directory events filename ; do
-    if [[ "${filename}" == *".conf" || "${filename}" == "sshd_config" || "${filename}" == "allowlist.txt" ]] ; then
+    if [[ "${filename}" == *".conf" || "${filename}" == "sshd_config" ]] ; then
       apply_deduplicated reload sshd 1s
-      apply_deduplicated restart local 1s
+    elif [[ "${filename}" == "allowlist.txt" ]] ; then
+      sleep 5s
+      grow-allow-and-ban-lists.sh
     fi
   done &
 
