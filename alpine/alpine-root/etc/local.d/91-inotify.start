@@ -27,6 +27,13 @@ inotifywait --event close_write,moved_to,create --monitor --recursive /etc/conf.
         logger -t "${tag}"
   done &
 
+inotifywait --event close_write,moved_to,create --monitor --recursive /var/tmp/ |
+  while read -r directory events filename ; do
+    if [[ "${filename}" == "${LOCAL_BANLIST}" ]] ; then
+      reload-local-banlist.sh
+    fi
+  done &
+
 [ -f /etc/init.d/coredns ] && inotifywait --event close_write,moved_to,create --monitor --recursive /etc/coredns/ |
   while read -r directory events filename ; do
     if [[ "${filename}" == "Corefile" ]] ; then
