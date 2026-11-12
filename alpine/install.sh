@@ -66,6 +66,10 @@ umount -l /mnt || :
 vim config.sh
 source config.sh
 
+export CXXFLAGS="${CFLAGS}"
+export FCFLAGS="${CFLAGS}"
+export FFLAGS="${CFLAGS}"
+
 setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
 apk add coreutils e2fsprogs gcc musl-dev sfdisk
 
@@ -282,12 +286,6 @@ apk add --update --no-cache rustup
 rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target x86_64-unknown-linux-musl
 source ~/.cargo/env
 rustc --print target-cpus | grep native | sed 's/.* (currently //;s/)\.//' >/mnt/etc/target-cpu
-export CFLAGS='-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always'
-export CXXFLAGS="${CFLAGS}"
-export FCFLAGS="${CFLAGS}"
-export FFLAGS="${CFLAGS}"
-export LDFLAGS='-Wl,-z,now -Wl,-z,relro'
-export RUSTFLAGS='-C target-cpu=native -C force-frame-pointers=y'
 
 install_rust_crate quicssh-rs-robust
 

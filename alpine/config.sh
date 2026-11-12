@@ -89,6 +89,10 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
 export RUST_VERSION='1.99.1'
 export QUICSSH_ROBUST_VERSION='0.1.6'
 
+export CFLAGS='-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always'
+export LDFLAGS='-Wl,-z,now -Wl,-z,relro'
+export RUSTFLAGS='-C target-cpu=native -C force-frame-pointers=y'
+
 # https://github.com/alpinelinux/alpine-conf/blob/master/setup-alpine.in
 
 export ANSWERS="
