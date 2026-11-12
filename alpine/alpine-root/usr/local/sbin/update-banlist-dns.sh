@@ -10,4 +10,4 @@ wget -qO - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | \
   grep --line-buffered '^0\.0\.0\.0 ' | \
   sed --unbuffered 's!^0\.0\.0\.0 !127.1.1.1 !' >"${new}"
 
-[ -s "${new}" ] && [ $(stat -c "%s" "${new}") -gt 1 ] && mv "${new}" "${DNS_BANLIST}" || exit 1
+[ -s "${new}" ] && [ $(stat -c '%s' "${new}") -gt 1 ] && mv "${new}" "${DNS_BANLIST}" || exit 1

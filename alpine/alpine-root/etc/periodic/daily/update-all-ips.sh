@@ -1,0 +1,1 @@
+../../../usr/local/sbin/update-all-ips.sh

@@ -42,27 +42,6 @@ filter_ipv6 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 saddr
   nft add rule inet filter input udp dport 443 accept
 }
 
-# allow HTTP/HTTPS traffic from Cloudflare IPs
-{
-  [ ! -f /var/tmp/cloudflare-ipv4.txt ] || [ ! -f /var/tmp/cloudflare-ipv6.txt ] && update-cloudflare-ips.sh || :
-
-  [ -f /usr/sbin/nginx ] && {
-    nft_list 'add rule inet filter input ip saddr' 'tcp dport { 80, 443 } accept' </var/tmp/cloudflare-ipv4.txt
-    nft_list 'add rule inet filter input ip saddr' 'udp dport 443 accept' </var/tmp/cloudflare-ipv4.txt
-    nft_list 'add rule inet filter input ip6 saddr' 'tcp dport { 80, 443 } accept' </var/tmp/cloudflare-ipv6.txt
-    nft_list 'add rule inet filter input ip6 saddr' 'udp dport 443 accept' </var/tmp/cloudflare-ipv6.txt
-  }
-} &
-
-# disallow traffic from bots
-{
-  [ ! -f /var/tmp/google-googlebot-ipv4.txt ] && update-google-ips.sh || :
-  [ ! -f /var/tmp/bots-amazon-ipv4.txt ] && update-bot-ips.sh || :
-
-  sort -u /var/tmp/{google,bots}-*-ipv4.txt | nft_list 'add rule inet filter input ip saddr' 'drop'
-  sort -u /var/tmp/{google,bots}-*-ipv6.txt | nft_list 'add rule inet filter input ip6 saddr' 'drop'
-} &
-
 [ -f /usr/bin/tor ] && {
   nft insert rule inet filter input iifname lo tcp dport 8118-9050 tcp sport 1-65000 accept
 }
@@ -75,5 +54,3 @@ filter_ipv6 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 saddr
 [ -f /usr/bin/tinyproxy ] && {
   nft insert rule inet filter input iifname lo tcp dport 8889 tcp sport 1-65000 accept
 }
-
-wait

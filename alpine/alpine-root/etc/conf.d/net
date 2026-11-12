@@ -1,0 +1,21 @@
+# https://raw.githubusercontent.com/gentoo/netifrc/refs/heads/master/doc/net.example.Linux.in
+
+#config_eth0="
+#  192.168.1.2/24
+#  10.20.30.40/16
+#  2001:db8:1::a/64
+#"
+#
+#routes_eth0="
+#  default via 192.168.1.1
+#  default via 2001:db8:1::1
+#"
+
+dhcp="nodns nogateway nonis nontp nosendhost"
+
+mac_eth0="random-samekind"
+mac_eth1="random-samekind"
+mac_wlan0="random-samekind"
+mac_wlan1="random-samekind"
+
+modules_wlan1="!udhcpc !dhcpcd !iw !iwconfig !wpa_supplicant !dhclient" # for AP mode

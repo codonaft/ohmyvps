@@ -62,4 +62,4 @@ download() {
 before=$(sum)
 download
 after=$(sum)
-[ "${before}" != "${after}" ] && exit 0 || exit 1
+[ "${before}" = "${after}" ] && exit 1

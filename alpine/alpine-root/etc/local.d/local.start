@@ -6,4 +6,7 @@ setterm -blank 0
 setterm -powersave off
 setterm -powerdown 0
 
-update-nginx-allowlist.sh || :
+[ ! -f /var/tmp/cloudflare-ipv4.txt ] && {
+  sleep 30s
+  update-all-ips.sh
+} &

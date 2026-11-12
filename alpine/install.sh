@@ -257,7 +257,7 @@ git config --global user.email "root@${VPS_HOSTNAME}"
 rm -fv /etc/ssh/ssh_host_*
 
 echo 'nameserver 127.0.0.1' >/etc/resolv.conf || :
-for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
+for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/default/grub /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
   chattr +i \$i || :
 done
 

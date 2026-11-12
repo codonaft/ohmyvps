@@ -46,9 +46,9 @@ plugins=(git command-not-found zsh-syntax-highlighting command-time)
 fpath+=~/.zsh/completions
 
 print_status() {
-    local exit_code="$?"
-    local last_cmd=(${(z)history[$((HISTCMD-1))]})
-    [ "${exit_code}" -ne 0 ] && [ "${exit_code}" -ne 130 ] && print -P "Exit code: %F{red}${exit_code}%f"
+  local exit_code="$?"
+  local last_cmd=(${(z)history[$((HISTCMD-1))]})
+  [ "${exit_code}" -ne 0 ] && [ "${exit_code}" -ne 130 ] && print -P "Exit code: %F{red}${exit_code}%f"
 }
 precmd_functions+=(print_status)
 #setopt print_exit_value
@@ -60,24 +60,24 @@ ZSH_COMMAND_TIME_EXCLUDE=(vi nvim vim mcedit nano mpv ncmpcpp)
 source $ZSH/oh-my-zsh.sh
 
 zsh_command_time() {
-    if [ -n "$ZSH_COMMAND_TIME" ]; then
-        hours=$(($ZSH_COMMAND_TIME/3600))
-        min=$(($ZSH_COMMAND_TIME/60))
-        sec=$(($ZSH_COMMAND_TIME%60))
-        if [ "$ZSH_COMMAND_TIME" -le 60 ]; then
-            timer_show="$fg[green]${ZSH_COMMAND_TIME}s"
-        elif [ "$ZSH_COMMAND_TIME" -gt 60 ] && [ "$ZSH_COMMAND_TIME" -le 180 ]; then
-            timer_show="$fg[yellow]${min}m ${sec}s"
-        else
-            if [ "$hours" -gt 0 ]; then
-                min=$(($min%60))
-                timer_show="$fg[red]${hours}h ${min}m ${sec}s"
-            else
-                timer_show="$fg[red]${min}m ${sec}s"
-            fi
-        fi
-        printf "${ZSH_COMMAND_TIME_MSG}\n" "$timer_show"
+  if [ -n "$ZSH_COMMAND_TIME" ] ; then
+    hours=$(($ZSH_COMMAND_TIME/3600))
+    min=$(($ZSH_COMMAND_TIME/60))
+    sec=$(($ZSH_COMMAND_TIME%60))
+    if [ "$ZSH_COMMAND_TIME" -le 60 ] ; then
+      timer_show="$fg[green]${ZSH_COMMAND_TIME}s"
+    elif [ "$ZSH_COMMAND_TIME" -gt 60 ] && [ "$ZSH_COMMAND_TIME" -le 180 ] ; then
+      timer_show="$fg[yellow]${min}m ${sec}s"
+    else
+      if [ "$hours" -gt 0 ] ; then
+        min=$(($min%60))
+        timer_show="$fg[red]${hours}h ${min}m ${sec}s"
+      else
+        timer_show="$fg[red]${min}m ${sec}s"
+      fi
     fi
+    printf "${ZSH_COMMAND_TIME_MSG}\n" "$timer_show"
+  fi
 }
 
 autoload -U compinit && compinit
@@ -117,42 +117,42 @@ export PS1='%(!.%B%F{red}.%B%F{green}%n)%F{'${hostname_color}'}@%m %F{blue}%(!.%
 #
 #   # if the cursor is following a blank, you are completing in CWD
 #   # the condition would be much nicer, if it's based on IFS
-#   if [[ $LBUFFER[-1] = " " || $LBUFFER[-1] = "=" ]]; then
-#       complt="$PWD"
+#   if [[ $LBUFFER[-1] = " " || $LBUFFER[-1] = "=" ]] ; then
+#     complt="$PWD"
 #   else
-#       # otherwise take the last word of LBUFFER
-#       complt=${${=LBUFFER}[-1]}
+#     # otherwise take the last word of LBUFFER
+#     complt=${${=LBUFFER}[-1]}
 #   fi
 #
 #   # determine the physical path, if $complt is not an option (i.e. beginning with "-")
 #   [[ $complt[1] = "-" ]] || complt=${complt:A}/
 #
 #   # activate completion only if the file is on a local filesystem, otherwise produce a beep
-#   if [[ ! $complt = /nfs/* && ! $complt = /media/* ]]; then
-#       zle expand-or-complete
+#   if [[ ! $complt = /nfs/* && ! $complt = /media/* ]] ; then
+#     zle expand-or-complete
 #   #else
-#   #    echo -en "\007"
+#   #  echo -en "\007"
 #   fi
 #}
 #zle -N restricted-expand-or-complete
 #bindkey "^I" restricted-expand-or-complete
 
 precmd() {
-    [ -z "${TMUX}" ] || {
-        # FIXME: get window number of currently running zsh, not just window number of currently selected window
-        window_number="$(/usr/bin/tmux display-message -p '#I')"
-        [ "${window_number}" -ne 0 ] && [ "${window_number}" -ne 1 ] && {
-            max_window_title_length=15
-            window_title=$(basename "${PWD}")
-            if [ "${#window_title}" -gt "${max_window_title_length}" ]; then
-                window_title=$(echo -n "\u2026${window_title: -${max_window_title_length}}")
-            fi
-            /usr/bin/tmux rename-window -t "${window_number}" "${window_title}" 2&>>/dev/null
-        }
+  [ -z "${TMUX}" ] || {
+    # FIXME: get window number of currently running zsh, not just window number of currently selected window
+    window_number="$(/usr/bin/tmux display-message -p '#I')"
+    [ "${window_number}" -ne 0 ] && [ "${window_number}" -ne 1 ] && {
+      max_window_title_length=15
+      window_title=$(basename "${PWD}")
+      if [ "${#window_title}" -gt "${max_window_title_length}" ] ; then
+        window_title=$(echo -n "\u2026${window_title: -${max_window_title_length}}")
+      fi
+      /usr/bin/tmux rename-window -t "${window_number}" "${window_title}" 2&>>/dev/null
     }
+  }
 }
 
 TRAPEXIT() {
-    # remove potentially destructive/sensitive commands from the history
-    sed -i '/.*;rm .*/d;/.*;srm .*/d;/.*;git .*commit .*--amend.*/d;/.*;git .*push .*-f.*/d;/.*;git .*please .*/d;/.*;sudo .*/d' ~/.zsh_history
+  # remove potentially destructive/sensitive commands from the history
+  sed -i '/.*;rm .*/d;/.*;srm .*/d;/.*;git .*commit .*--amend.*/d;/.*;git .*push .*-f.*/d;/.*;git .*please .*/d;/.*;sudo .*/d' ~/.zsh_history
 }
