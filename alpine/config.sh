@@ -4,6 +4,7 @@ export FORMAT_DISK='1' # NOTE: 1 will create dos partition table with a single e
 export MKFS_OPTS='fast_commit'
 
 export MOUNT_OPTS='defaults,noatime,nodiratime,discard,commit=60,errors=remount-ro'
+export KERNEL_OPTS='random.trust_cpu=off init_on_free=1 init_on_alloc=1 vt.cur_default=0x00790011 usbcore.autosuspend=-1'
 
 export SSH_PORT='666'
 export SSH_ALLOW_TCP='0'

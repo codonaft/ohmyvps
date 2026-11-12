@@ -162,7 +162,7 @@ case "${action}" in
     echo '#!/bin/sh
       cat << EOF
       menuentry "Alpine Linux" --unrestricted {
-        linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1
+        linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1 vt.cur_default=0x00790011 usbcore.autosuspend=-1
         initrd /boot/initramfs-virt
       }
       EOF' > /etc/grub.d/99_custom
