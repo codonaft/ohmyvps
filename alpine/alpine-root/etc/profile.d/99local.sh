@@ -33,14 +33,18 @@ export UNBOUND_DNS_PORT=$(grep -o '^\s*interface:.*@[0-9]*' /etc/unbound/unbound
 export NGINX_CLOUDFLARE_CONF='/etc/nginx/cloudflare.conf'
 export NGINX_ALLOWLIST_CONF='/etc/nginx/allowlist.conf'
 
-nft_list () {
-  start="$1"
-  end="$2"
+nft_list() {
+  local start="$1" end="$2" first
+
+  IFS= read -r first && [ -n "${first}" ] || return 0
+
   {
-    echo -n "${start} {"
+    echo "${start} {${first}"
+    cat
+  } | {
     paste -sd ',' | tr -d '\n'
     echo "} ${end}"
-  } | nft -f - || :
+  } | nft -f -
 }
 
 filter_no_comment () {
