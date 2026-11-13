@@ -24,8 +24,8 @@ nft add rule inet filter output udp dport '{ 69, 194, 389, 513, 514, 5060 }' rej
 nft add rule inet filter input icmp type echo-request limit rate 6/second accept
 nft add rule inet filter input icmpv6 type echo-request limit rate 6/second accept
 
-filter_ipv4 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip saddr' 'icmp accept'
-filter_ipv6 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 saddr' 'icmpv6 accept'
+filter_ipv4 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip saddr' 'ip protocol icmp accept'
+filter_ipv6 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 saddr' 'ip protocol icmpv6 accept'
 
 ## allow ICMP traffic from all IPs
 #nft add rule inet filter input icmp accept

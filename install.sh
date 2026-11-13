@@ -130,6 +130,7 @@ fi
 
 case "${action}" in
   "${BOOT_ALPINE}")
+    BOOT_ENTRY='Alpine Linux'
     ARCH='x86_64'
     VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
 
@@ -159,16 +160,16 @@ case "${action}" in
     umount /mnt
 
     find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
-    echo '#!/bin/sh
+    echo "#!/bin/sh
       cat << EOF
-      menuentry "Alpine Linux" --unrestricted {
+      menuentry \"${BOOT_ENTRY}\" --unrestricted {
         linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1 vt.cur_default=0x00790011 usbcore.autosuspend=-1
         initrd /boot/initramfs-virt
       }
-      EOF' > /etc/grub.d/99_custom
+      EOF" > /etc/grub.d/99_custom
     chmod +x /etc/grub.d/99_custom
     update-grub
-    grub-reboot 'Alpine Linux'
+    grub-reboot "${BOOT_ENTRY}"
 
     sync
     echo 3 > /proc/sys/vm/drop_caches
