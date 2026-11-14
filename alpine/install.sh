@@ -135,8 +135,8 @@ mount --rbind /proc /mnt/proc
 [ -d alpine-root/ ] && rsync --archive --no-perms --no-group --no-owner --chmod=go-w alpine-root/ /mnt/
 
 sed --in-place "s|^default_kernel_opts=\"quiet \(.*\)\"$|default_kernel_opts=\"\1 ${KERNEL_OPTS}\"|g;s|^default=.*\$|default=virt|" /mnt/etc/update-extlinux.conf # affects grub as well
-sed --in-place '/^GRUB_CMDLINE_LINUX_DEFAULT=/d' /mnt/etc/default/grub || :
-echo "GRUB_CMDLINE_LINUX_DEFAULT=\" ro modules=sd-mod,usb-storage,ext4 rootfstype=ext4 ${KERNEL_OPTS}\"" >>/mnt/etc/default/grub
+#sed --in-place '/^GRUB_CMDLINE_LINUX_DEFAULT=/d' /mnt/etc/default/grub || :
+#echo "GRUB_CMDLINE_LINUX_DEFAULT=\" ro modules=sd-mod,usb-storage,ext4 rootfstype=ext4 ${KERNEL_OPTS}\"" >>/mnt/etc/default/grub
 
 sed --in-place "s!^#Port 22!Port ${SSH_PORT}!;s!^#PasswordAuthentication yes!PasswordAuthentication no!;s!^AllowTcpForwarding no!AllowTcpForwarding yes!" /mnt/etc/ssh/sshd_config
 [ "${SSH_ALLOW_TCP}" = '0' ] && sed --in-place 's!^#ListenAddress 0\.0\.0\.0!ListenAddress 127.0.0.1!;s!^#ListenAddress ::!ListenAddress ::1!' /mnt/etc/ssh/sshd_config
