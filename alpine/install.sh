@@ -55,7 +55,6 @@ echo -n >/etc/init.d/openssh || :
 chattr +i /etc/init.d/openssh || :
 
 echo 'disabling tiny-cloud'
-eject || :
 tiny-cloud --disable || :
 apk del tiny-cloud-alpine tiny-cloud || :
 deluser --remove-home alpine || :

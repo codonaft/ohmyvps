@@ -33,7 +33,6 @@ for i in "${APKS[@]}" ; do
   [ "${services[$i]}" = '' ] && services["$i"]="$i"
 done
 
-eject || :
 apk add --no-cache --upgrade apk-tools 2>>/dev/stdout | logger || :
 apk upgrade --no-cache 2>>/dev/stdout | logger
 apk del doas linux-lts openssh-server-pam syslinux tiny-cloud-alpine tiny-cloud || :

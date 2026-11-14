@@ -21,9 +21,4 @@ tty6::respawn:/sbin/getty 38400 tty6
 # Stuff to do before rebooting
 ::shutdown:/sbin/openrc shutdown
 
-# enable login on alternative console
-ttyS0::respawn:/sbin/getty -L 0 ttyS0 vt100
-
-# FIXME
-#::wait:/usr/bin/chvt 12
-#::shutdown:/usr/bin/chvt 1
+::wait:/usr/bin/chvt 12
