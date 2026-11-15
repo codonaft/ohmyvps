@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-allowed_services=$(echo 'hostname syslog' ; rc-update show default | sed 's! *!!;s! | .*$!!')
+allowed_services=$(echo 'hostname syslog' ; rc-update show default | sed 's| *||;s| | .*$||')
 tag="$(basename $0)"
 
 apply_deduplicated () {

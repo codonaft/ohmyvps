@@ -52,7 +52,6 @@ export WORLD_PACKAGES=(
   macchanger
   mtr
   ncdu
-  #netifrc
   nftables
   #nginx-mod-http-brotli
   #nginx

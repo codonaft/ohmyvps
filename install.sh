@@ -92,7 +92,10 @@ fi
 
 wan_iface=$(ip route | grep default | awk '{print $5}')
 alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
-which apk && setup-apkrepos "${alpine_latest_stable}/main" "${alpine_latest_stable}/community" && apk add bash gnupg htop nftables rsync tmux vim wget yq
+which apk && {
+  chattr -i /etc/apk/repositories || :
+  setup-apkrepos "${alpine_latest_stable}/main" "${alpine_latest_stable}/community" && apk add bash gnupg htop nftables rsync tmux vim wget yq
+}
 which apt && apt -y install bash gnupg htop nftables rsync tmux vim wget yq
 
 echo 'applying firewall rules'
@@ -107,11 +110,11 @@ INSTALL_ALPINE='Install Alpine'
 INSTALL_GENTOO='Install Gentoo'
 
 clear
-if grep Ubuntu /etc/*release >>/dev/null ; then
-  echo "1. ${BOOT_ALPINE}"
+if [ -d /.modloop ] ; then
+  echo "1. ${INSTALL_ALPINE}"
   echo "2. ${INSTALL_GENTOO}"
 else
-  echo "1. ${INSTALL_ALPINE}"
+  echo "1. ${BOOT_ALPINE}"
   echo "2. ${INSTALL_GENTOO}"
 fi
 echo
@@ -120,12 +123,14 @@ default_choice='1'
 read -p "What's next? [${default_choice}] " choice
 choice="${choice:-${default_choice}}"
 
-if [ "${choice}" = 2 ] ; then
-  action="${INSTALL_GENTOO}"
-elif [ -d /.modloop ] ; then
-  action="${INSTALL_ALPINE}"
+if [ "${choice}" = 1 ] ; then
+  if [ -d /.modloop ] ; then
+    action="${INSTALL_ALPINE}"
+  else
+    action="${BOOT_ALPINE}"
+  fi
 else
-  action="${BOOT_ALPINE}"
+  action="${INSTALL_GENTOO}"
 fi
 
 case "${action}" in
@@ -159,7 +164,7 @@ case "${action}" in
     cp -a /mnt/* /boot/ || : # in case if you have a separate /boot partition and the rest of stuff on LVM
     umount /mnt
 
-    chattr -x /etc/default/grub /etc/update-extlinux.conf || :
+    chattr -i /etc/default/grub /etc/update-extlinux.conf || :
     find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
     echo "#!/bin/sh
       cat << EOF

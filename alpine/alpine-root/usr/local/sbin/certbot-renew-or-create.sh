@@ -109,7 +109,7 @@ sudo /etc/init.d/nginx status
 
 IFS="," read -r -a domains_array <<< "${domains}"
 for i in "${domains_array[@]}" ; do
-  url="http://$(echo $i | sed 's!^\*!!')/${challenge_dir}/${expected_filename}"
+  url="http://$(echo $i | sed 's|^\*||')/${challenge_dir}/${expected_filename}"
   echo "testing ${url}"
   actual=$(sudo -u certbot wget --no-hsts -qO - "${url}")
   [ "${expected}" == "${actual}" ] || {
@@ -119,14 +119,14 @@ for i in "${domains_array[@]}" ; do
 done
 sudo su certbot -c "rm -fv ${challege_full_dir}/test_*"
 
-first_domain=$(echo "${domains}" | cut -d',' -f1 | sed 's!^\*\.!!')
+first_domain=$(echo "${domains}" | cut -d',' -f1 | sed 's|^\*\.||')
 max_secs_before_renew=$(( MAX_DAYS_BEFORE_RENEW * 60 * 60 * 24 ))
 #max_secs_before_renew=100000000000 # NOTE: debug
 
 sudo cat "${fullchain}" | sudo -u certbot openssl x509 -checkend "${max_secs_before_renew}" -noout >/dev/null && {
   expiration_date=$(sudo cat "${fullchain}" | sudo -u certbot openssl x509 -noout -enddate | sed 's/notAfter=//')
   echo "Certificate ${first_domain} is not expiring yet, expiration date is ${expiration_date}"
-  actual_domains=$(sudo cat "${fullchain}" | sudo -u certbot openssl x509 -text -noout | grep -E -o 'DNS.*' | sed 's!\s*DNS:!!g' | sort -u | tr '\n' ',')
+  actual_domains=$(sudo cat "${fullchain}" | sudo -u certbot openssl x509 -text -noout | grep -E -o 'DNS.*' | sed 's|\s*DNS:||g' | sort -u | tr '\n' ',')
   expected_domains=$(echo "${domains}" | tr ',' '\n' | sort -u | tr '\n' ',')
   if [ "${actual_domains}" == "${expected_domains}" ] ; then
     echo "Nothing to update, same domains: ${actual_domains}"
