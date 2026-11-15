@@ -49,6 +49,7 @@ export WORLD_PACKAGES=(
   jq
   logrotate
   #lyrebird
+  macchanger
   mtr
   ncdu
   #netifrc

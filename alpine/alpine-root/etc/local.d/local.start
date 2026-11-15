@@ -6,5 +6,5 @@ setterm -powerdown 0
 
 [ ! -f /var/tmp/cloudflare-ipv4.txt ] && {
   sleep 30s
-  update-all-ips.sh
+  [ ! -f /var/tmp/cloudflare-ipv4.txt ] && update-all-ips.sh
 } &

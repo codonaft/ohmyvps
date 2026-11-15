@@ -7,7 +7,7 @@ ps uax | grep -E " socat .*${EXTERNAL_TOR_DNS}" | grep -v grep >>/dev/null || {
 }
 
 [ -f /etc/init.d/tor ] && {
-  sudo -u nobody dig -p ${EXTERNAL_TOR_DNS_LOCAL_TCP_PORT} +tcp +timeout=120 www.cloudflare.com | grep NOERROR || rc-service tor restart
+  sudo -u nobody dig -p ${EXTERNAL_TOR_DNS_LOCAL_TCP_PORT} +tcp +timeout=5 www.cloudflare.com | grep NOERROR || rc-service tor restart
 }
 
 [ -f /etc/init.d/i2pd ] && {

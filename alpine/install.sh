@@ -95,7 +95,7 @@ mount | grep "${TARGET_DISK}" >>/dev/null && {
 }
 
 root_partition="${TARGET_DISK}1"
-[ "${FORMAT_DISK}" == 1 ] && {
+[ "${FORMAT_DISK}" = 1 ] && {
   echo 'creating partition table and filesystem'
 
   [ -e "${root_partition}" ] && read -r major minor < <(stat -c '%Hr %Lr' "${root_partition}")
@@ -135,12 +135,9 @@ mount --rbind /proc /mnt/proc
 [ -d alpine-root/ ] && rsync --archive --no-perms --no-group --no-owner --chmod=go-w alpine-root/ /mnt/
 
 sed --in-place "s|^default_kernel_opts=\"quiet \(.*\)\"$|default_kernel_opts=\"\1 ${KERNEL_OPTS}\"|g;s|^default=.*\$|default=virt|" /mnt/etc/update-extlinux.conf # affects grub as well
-#sed --in-place '/^GRUB_CMDLINE_LINUX_DEFAULT=/d' /mnt/etc/default/grub || :
-#echo "GRUB_CMDLINE_LINUX_DEFAULT=\" ro modules=sd-mod,usb-storage,ext4 rootfstype=ext4 ${KERNEL_OPTS}\"" >>/mnt/etc/default/grub
-
-sed --in-place "s!^#Port 22!Port ${SSH_PORT}!;s!^#PasswordAuthentication yes!PasswordAuthentication no!;s!^AllowTcpForwarding no!AllowTcpForwarding yes!" /mnt/etc/ssh/sshd_config
-[ "${SSH_ALLOW_TCP}" = '0' ] && sed --in-place 's!^#ListenAddress 0\.0\.0\.0!ListenAddress 127.0.0.1!;s!^#ListenAddress ::!ListenAddress ::1!' /mnt/etc/ssh/sshd_config
-sed --in-place "s!\s*ext4\s*rw,relatime\s*!\text4\t${MOUNT_OPTS} !" /mnt/etc/fstab || :
+sed --in-place "s|^#Port 22|Port ${SSH_PORT}|;s|^#PasswordAuthentication yes|PasswordAuthentication no|;s|^AllowTcpForwarding no|AllowTcpForwarding yes|" /mnt/etc/ssh/sshd_config
+[ "${SSH_ALLOW_TCP}" = '0' ] && sed --in-place 's|^#ListenAddress 0\.0\.0\.0|ListenAddress 127.0.0.1|;s|^#ListenAddress ::|ListenAddress ::1|' /mnt/etc/ssh/sshd_config
+sed --in-place "s|\s*ext4\s*rw,relatime\s*|\text4\t${MOUNT_OPTS} |" /mnt/etc/fstab || :
 
 echo "entering chroot"
 chroot /mnt /bin/bash -s <<END
@@ -182,7 +179,7 @@ done
 echo "setting up users"
 chmod 00700 /root
 setup-user -a -g abuild,audio,video,netdev -k "${USER_SSH_KEY}" -f "${USERNAME}" "${USERNAME}"
-[ "${ENABLE_PASSWORDLESS_TTY_ROOT_LOGIN}" == 0 ] && usermod -p '*' root
+[ "${ENABLE_PASSWORDLESS_TTY_ROOT_LOGIN}" = 0 ] && usermod -p '*' root
 usermod -p '*' "${USERNAME}"
 
 echo "setting podman stuff"
@@ -284,7 +281,7 @@ echo 'installing rust'
 apk add --update --no-cache rustup
 rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target x86_64-unknown-linux-musl
 source ~/.cargo/env
-rustc --print target-cpus | grep native | sed 's/.* (currently //;s/)\.//' >/mnt/etc/target-cpu
+rustc --print target-cpus | grep native | sed 's|.* (currently ||;s|)\.||' >/mnt/etc/target-cpu
 
 install_rust_crate quicssh-rs-robust
 

@@ -18,4 +18,4 @@ mac_eth1="random-samekind"
 mac_wlan0="random-samekind"
 mac_wlan1="random-samekind"
 
-modules_wlan1="!udhcpc !dhcpcd !iw !iwconfig !wpa_supplicant !dhclient" # for AP mode
+modules_wlan1="!dhclient !dhcpcd !udhcpc !iw !iwconfig !wpa_supplicant" # for AP mode

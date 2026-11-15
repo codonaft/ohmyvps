@@ -120,12 +120,12 @@ default_choice='1'
 read -p "What's next? [${default_choice}] " choice
 choice="${choice:-${default_choice}}"
 
-if grep Ubuntu /etc/*release >>/dev/null ; then
-  action="${BOOT_ALPINE}"
-  [ "${choice}" = 2 ] && action="${INSTALL_GENTOO}"
-else
+if [ "${choice}" = 2 ] ; then
+  action="${INSTALL_GENTOO}"
+elif [ -d /.modloop ] ; then
   action="${INSTALL_ALPINE}"
-  [ "${choice}" = 2 ] && action="${INSTALL_GENTOO}"
+else
+  action="${BOOT_ALPINE}"
 fi
 
 case "${action}" in
@@ -159,6 +159,7 @@ case "${action}" in
     cp -a /mnt/* /boot/ || : # in case if you have a separate /boot partition and the rest of stuff on LVM
     umount /mnt
 
+    chattr -x /etc/default/grub /etc/update-extlinux.conf || :
     find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
     echo "#!/bin/sh
       cat << EOF

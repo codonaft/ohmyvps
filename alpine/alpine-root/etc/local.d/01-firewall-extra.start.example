@@ -8,7 +8,7 @@ nft add chain inet filter output '{ type filter hook output priority 0; policy a
 nft add chain inet filter nat_output '{ type nat hook output priority -100; policy accept; }' || :
 
 # some VPSes require incoming ICMPv6 from gateway to be allowed (perhaps Neighbor Discovery Protocol related)
-[ -n "${WAN_IPV6_GW}" ] && nft add rule inet filter input ip6 saddr "${WAN_IPV6_GW}" icmpv6 accept
+[ -n "${WAN_IPV6_GW}" ] && nft add rule inet filter input ip6 saddr "${WAN_IPV6_GW}" icmpv6 accept || :
 
 # disallow some of the legacy unencrypted protocols
 nft add rule inet filter output tcp dport '{ 20, 21, 23, 25, 49, 69, 80, 109, 110, 119, 143, 161, 162, 194, 389, 513, 514, 5060, 6667, 8080 }' reject
@@ -28,29 +28,29 @@ filter_ipv4 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip saddr'
 filter_ipv6 <"${SSH_ALLOWLIST}" | nft_list 'add rule inet filter input ip6 saddr' 'ip protocol icmpv6 accept'
 
 ## allow ICMP traffic from all IPs
-#nft add rule inet filter input icmp accept
-#nft add rule inet filter input icmpv6 accept
+#nft add rule inet filter input ip protocol icmp accept
+#nft add rule inet filter input ip protocol icmpv6 accept
 
 ## allow all connections to ssh from non-banned IPs
-#[ -f /usr/sbin/sshd ] && {
+#if [ -f /usr/sbin/sshd ] ; then
 #  nft add rule inet filter input tcp dport "${SSH_PORT}" accept
-#}
+#fi
 
 # allow HTTP/HTTPS traffic from all IPs
-[ -f /usr/sbin/nginx ] && {
+if [ -f /usr/sbin/nginx ] ; then
   nft add rule inet filter input tcp dport '{ 80, 443 }' accept
   nft add rule inet filter input udp dport 443 accept
-}
+fi
 
-[ -f /usr/bin/tor ] && {
+if [ -f /usr/bin/tor ] ; then
   nft insert rule inet filter input iifname lo tcp dport 8118-9050 tcp sport 1-65000 accept
-}
+fi
 
-[ -f /usr/sbin/i2pd ] && {
+if [ -f /usr/sbin/i2pd ] ; then
   #nft add rule inet filter input udp dport "${I2P_UDP}" accept
   nft insert rule inet filter input iifname lo tcp dport 7070-4444 tcp sport 1-65000 accept
-}
+fi
 
-[ -f /usr/bin/tinyproxy ] && {
+if [ -f /usr/bin/tinyproxy ] ; then
   nft insert rule inet filter input iifname lo tcp dport 8889 tcp sport 1-65000 accept
-}
+fi
