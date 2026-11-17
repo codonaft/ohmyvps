@@ -34,10 +34,11 @@ function maybe_install_oh_my_zsh() {
 }
 
 function install_rust_crate() {
-  crate="$1"
-  echo "installing ${crate}"
-  cargo install --force --locked --version "${QUICSSH_ROBUST_VERSION}" "${crate}"
-  mv ~/.cargo/bin/${crate} /mnt/usr/local/bin/
+  bin="$1"
+  git="$2"
+  echo "installing ${bin}"
+  cargo install --force --locked --rev "${QUICSSH_VERSION}" --git "${git}"
+  mv ~/.cargo/bin/${bin} /mnt/usr/local/bin/
 }
 
 function sync_all() {
@@ -289,7 +290,7 @@ rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target 
 source ~/.cargo/env
 rustc --print target-cpus | grep native | sed 's|.* (currently ||;s|)\.||' >/mnt/etc/target-cpu
 
-install_rust_crate quicssh-rs-robust
+install_rust_crate 'quicssh-rs' 'https://github.com/aruz/quicssh-rs'
 
 sync_all
 

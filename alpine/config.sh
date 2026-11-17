@@ -87,15 +87,15 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
   coredns
   local
   ntpd
-  quicssh-rs-robust
+  quicssh-rs
   sshd
   #tinyproxy
   tor
   #unbound
 )
 
-export RUST_VERSION='1.99.1'
-export QUICSSH_ROBUST_VERSION='0.1.6'
+export RUST_VERSION='1.100.0'
+export QUICSSH_VERSION='f0d508df853c488b65fd1d8d667dfae0bf9d5063'
 
 export CFLAGS='-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always'
 export LDFLAGS='-Wl,-z,now -Wl,-z,relro'

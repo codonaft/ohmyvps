@@ -7,7 +7,7 @@
   - default `sshd` configuration disallows password authentication
   - manual `ssh` port by default
   - normal public `tcp`-based `ssh` is disabled by default
-    - [`quicssh-rs-robust`](https://github.com/hkatsuma/quicssh-rs-robust/tree/v0.1.6#client-ssh-config) is required on client
+    - [`quicssh-rs`](https://github.com/aruz/quicssh-rs/tree/f0d508df853c488b65fd1d8d667dfae0bf9d5063#client-ssh-config) is required on client
   - allow-list for incoming `ssh` connections
     - ~~alternatively, firewall autobans those who failed to login~~
 - designed for `tmux` + `vim` users.
