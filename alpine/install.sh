@@ -1,26 +1,4 @@
 #!/usr/bin/env bash
-#
-# MIT License
-#
-# Copyright (c) 2024—∞ Alexander Lopatin (https://codonaft.com)
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 
 set -xeuo pipefail
 
@@ -63,22 +41,32 @@ deluser --remove-home alpine || :
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
-vim -p config.sh alpine-root/etc/conf.d/net
+vim config.sh
 source config.sh
+
+world_packages=" ${WORLD_PACKAGES[*]} "
+if [[ "${world_packages}" == *" netifrc "* ]] ; then
+  vim alpine-root/etc/conf.d/net || :
+else
+  if [[ "${world_packages}" == *" macchanger "* ]] && ! grep -q macchanger ; then
+    echo '  # pre-up /usr/bin/macchanger -r ${IFACE}' >>/etc/network/interfaces || :
+  fi
+  vim /etc/network/interfaces || :
+fi
 
 export CXXFLAGS="${CFLAGS}"
 export FCFLAGS="${CFLAGS}"
 export FFLAGS="${CFLAGS}"
 
 setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
-apk add coreutils e2fsprogs gcc musl-dev sfdisk
+apk add e2fsprogs gcc musl-dev sfdisk
 
 echo "${ANSWERS}" >.answers.conf
 echo "USEROPTS='none'" >>.answers.conf
 echo "APKREPOSOPTS='$(cat /etc/apk/repositories)'" >>.answers.conf
 echo "INTERFACESOPTS='$(cat /etc/network/interfaces)'" >>.answers.conf
 
-mount | grep "${TARGET_DISK}" >>/dev/null && {
+mount | grep -q "${TARGET_DISK}" && {
   echo 'target disk is mounted, fixing it'
   disk_file=$(basename "${TARGET_DISK}")
   cp -r /.modloop /root/
@@ -90,16 +78,14 @@ mount | grep "${TARGET_DISK}" >>/dev/null && {
   done
 }
 
-mount | grep "${TARGET_DISK}" >>/dev/null && {
+mount | grep -q "${TARGET_DISK}" && {
   echo "${TARGET_DISK} is still mounted?"
   exit 1
 }
 
 root_partition="${TARGET_DISK}1"
-[ "${FORMAT_DISK}" = 1 ] && {
+[ "${FORMAT_DISK}" = '1' ] && {
   echo 'creating partition table and filesystem'
-
-  [ -e "${root_partition}" ] && read -r major minor < <(stat -c '%Hr %Lr' "${root_partition}")
 
   for i in "${TARGET_DISK}"?* ; do
     dd if=/dev/zero of=${i} bs=4K count=1K || :
@@ -110,7 +96,12 @@ root_partition="${TARGET_DISK}1"
   echo 'type=83' | sfdisk "${TARGET_DISK}"
   sync_all
 
-  [ ! -e "${root_partition}" ] && [ -n "${major}" ] && [ -n "${minor}" ] && {
+  [ ! -e "${root_partition}" ] && {
+    disk=$(sed 's|/dev/||' <<< ${TARGET_DISK})
+    partition=$(sed 's|/dev/||' <<< ${root_partition})
+    dev="/sys/block/${disk}/${partition}/dev"
+    major=$(cut -d ':' -f1 < ${dev})
+    minor=$(cut -d ':' -f2 < ${dev})
     mknod -m 660 "${root_partition}" b "${major}" "${minor}"
     chown root:disk "${root_partition}"
   }
@@ -169,10 +160,12 @@ rc-update del networking boot || :
 rc-update del sshd default || :
 
 for i in ${ADD_TO_BOOT_RUNLEVEL[@]} ; do
+  [[ "\$i" = net.* ]] && ln -s net.lo "/etc/init.d/\$i" || :
   rc-update add "\$i" boot || :
 done
 
 for i in ${ADD_TO_DEFAULT_RUNLEVEL[@]} ; do
+  [[ "\$i" = net.* ]] && ln -s net.lo "/etc/init.d/\$i" || :
   rc-update add "\$i" default || :
 done
 
@@ -268,7 +261,7 @@ rm -fv /etc/ssh/ssh_host_*
 
 echo 'nameserver 127.0.0.1' >/etc/resolv.conf || :
 for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/default/grub /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
-  chattr +i \$i || :
+  chattr +i "\$i" || :
 done
 
 cd /etc
@@ -298,3 +291,5 @@ umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
 echo 'INSTALLATION SUCCESS! You can reboot now.'
+
+[ "${REBOOT_AFTER_SUCCESS}" = '1' ] && reboot || :

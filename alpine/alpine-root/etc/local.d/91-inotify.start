@@ -8,7 +8,7 @@ apply_deduplicated () {
   service="$2"
   interval="$3"
   apply_command="sleep ${interval} && rc-service --ifstarted ${service} --verbose ${action}"
-  ps uax | grep "${apply_command}" | grep -v grep 2>>/dev/null || {
+  ps uax | grep "${apply_command}" | grep -qv grep || {
     logger "will ${action} ${service} in ${interval}"
     sh -c "${apply_command} 2>>/dev/stdout | logger -t ${tag}" &
   }
@@ -22,7 +22,7 @@ inotifywait --event close_write,moved_to,create --monitor --recursive /etc/local
 inotifywait --event close_write,moved_to,create --monitor --recursive /etc/conf.d/ |
   while read -r directory events filename ; do
     [ -f "/etc/init.d/${filename}" ] && \
-      grep --extended-regexp '(^| )'${filename}'($| )' <<<"${allowed_services}" >>/dev/null && \
+      grep -q --extended-regexp '(^| )'${filename}'($| )' <<<"${allowed_services}" && \
       ( rc-service --ifstarted "${filename}" reload || apply_deduplicated restart "${filename}" 10s ) 2>>/dev/stdout | \
         logger -t "${tag}"
   done &

@@ -1,6 +1,9 @@
+# NOTE: if you don't want to continue, uncomment the next line:
+# exit
+
 export TARGET_DISK='/dev/sda'
 
-export FORMAT_DISK='1' # NOTE: 1 will create dos partition table with a single ext4 partition
+export FORMAT_DISK='1' # NOTE: 1 will create dos partition table with a single ext4 partition!
 export MKFS_OPTS='fast_commit'
 
 export MOUNT_OPTS='defaults,noatime,nodiratime,discard,commit=60,errors=remount-ro'
@@ -13,6 +16,8 @@ export VPS_HOSTNAME='vps'
 export ROOT_SHELL='/bin/zsh'
 export ENABLE_PASSWORDLESS_TTY_ROOT_LOGIN='0'
 
+export REBOOT_AFTER_SUCCESS='1'
+
 export USERNAME='vpsuser'
 export USER_SHELL='/bin/zsh'
 export USER_SSH_KEY='https://github.com/username.keys'
@@ -20,6 +25,7 @@ export USER_SSH_KEY='https://github.com/username.keys'
 
 # NOTE: perhaps your default IPv6 gateway should be there as well
 export SSH_ALLOWED_IPS=(
+  #0.0.0.0
   #1.2.3.4
   #5.6.7.0/24
   #2001:db8:3333:4444:5555:6666:7777:8888
@@ -33,7 +39,6 @@ export WORLD_PACKAGES=(
   coredns
   coreutils
   #conntrack-tools
-  #crystal
   curl
   #e2fsprogs-extra
   file
@@ -48,11 +53,10 @@ export WORLD_PACKAGES=(
   #jless
   jq
   logrotate
-  #lyrebird
   macchanger
   mtr
   ncdu
-  netifrc
+  #netifrc
   nftables
   #nginx-mod-http-brotli
   #nginx
@@ -70,16 +74,17 @@ export WORLD_PACKAGES=(
   unbound
   util-linux
   vim
+  #wpa_supplicant
   yq
   zsh
   zsh-vcs
 )
 
 export ADD_TO_BOOT_RUNLEVEL=(
-  net.lo
-  net.eth0
+  #net.lo
+  #net.eth0
   #net.wlan0
-  #networking
+  networking
 )
 
 export ADD_TO_DEFAULT_RUNLEVEL=(

@@ -18,7 +18,7 @@ nft add rule inet filter output udp dport '{ 69, 194, 389, 513, 514, 5060 }' rej
 #nft add rule inet filter input udp dport '{ 68, 546 }' accept
 
 ## HE
-#nft add rule inet filter input iifname "${WAN_IFACE}" ip saddr 66.220.2.74 icmp accept
+#nft add rule inet filter input ip saddr 66.220.2.74 icmp accept
 
 # rate-limit ICMP
 nft add rule inet filter input icmp type echo-request limit rate 6/second accept

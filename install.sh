@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2024—∞ Alexander Lopatin (https://codonaft.com)
+# Copyright (c) 2024—∞ npub1alptdev5srcw2hxg03567p4k6xs3lgj7f6545suc0rzp0xw98svse7rg94 (https://codonaft.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,8 @@
 # SOFTWARE.
 
 set -eu
+
+PACKAGES='bash git gnupg htop nftables rsync tmux vim wget yq'
 
 # https://alpinelinux.org/keys/ncopa.asc
 # https://github.com/search?q=org%3Aalpinelinux%20ncopa.asc&type=code
@@ -81,8 +83,61 @@ Mkc=
 
 ALPINE_MIRROR='https://dl-cdn.alpinelinux.org/alpine'
 
-download_and_unpack() {
-  wget https://api.github.com/repos/codonaft/ohmyvps/tarball -O - | tar xzf -
+ALPINE_LATEST_STABLE="${ALPINE_MIRROR}/latest-stable"
+
+boot_alpine () {
+  BOOT_ENTRY='Alpine Linux'
+  ARCH='x86_64'
+  VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
+
+  latest_releases=$(wget -qO - "${ALPINE_LATEST_STABLE}/releases/${ARCH}/latest-releases.yaml")
+  default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
+
+  echo
+  read -p "Version? [${default_version}] " version
+  echo
+  version=${version:-${default_version}}
+  short_version=$(echo ${version} | sed 's!\.[0-9]*$!!')
+
+  set -x
+
+  iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
+  url="${ALPINE_MIRROR}/v${short_version}/releases/${ARCH}/${iso}"
+
+  wget -c "${url}" "${url}.sha256" "${url}.asc"
+  sha256sum -c "${iso}.sha256"
+
+  echo "${ALPINE_GPG}" | gpg --import
+  gpg --verify "${iso}.asc" "${iso}"
+
+  mount -t iso9660 "${iso}" /mnt
+  cp -a /mnt/* / || :
+  cp -a /mnt/* /boot/ || : # in case if you have a separate /boot partition and the rest of stuff on LVM
+  umount /mnt
+
+  chattr -i /etc/default/grub /etc/update-extlinux.conf || :
+  find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
+  echo "#!/bin/sh
+    cat << EOF
+    menuentry \"${BOOT_ENTRY}\" --unrestricted {
+      linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1 vt.cur_default=0x00790011 usbcore.autosuspend=-1
+      initrd /boot/initramfs-virt
+    }
+    EOF" > /etc/grub.d/99_custom
+  chmod +x /etc/grub.d/99_custom
+  update-grub
+  grub-reboot "${BOOT_ENTRY}"
+
+  sync
+  echo 3 > /proc/sys/vm/drop_caches
+  reboot
+}
+
+download() {
+  rm -rf *ohmyvps*
+  for i in https://github.com/codonaft/ohmyvps ; do
+    git clone --depth=1 "$i" && break
+  done
 }
 
 if [ "$(id -u)" != '0' ] ; then
@@ -90,20 +145,22 @@ if [ "$(id -u)" != '0' ] ; then
   exit 1
 fi
 
-wan_iface=$(ip route | grep default | awk '{print $5}')
-alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
+set -- "${PACKAGES}"
 which apk && {
   chattr -i /etc/apk/repositories || :
-  setup-apkrepos "${alpine_latest_stable}/main" "${alpine_latest_stable}/community" && apk add bash gnupg htop nftables rsync tmux vim wget yq
+  setup-apkrepos "${ALPINE_LATEST_STABLE}/main" "${ALPINE_LATEST_STABLE}/community" && apk add $@
 }
-which apt && apt -y install bash gnupg htop nftables rsync tmux vim wget yq
+which apt && apt -y install $@
 
 echo 'applying firewall rules'
 nft flush ruleset
 nft add table inet filter
 nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }'
+nft add rule inet filter input iifname 'lo' accept
+nft add rule inet filter input 'tcp flags != syn / fin,syn,rst,ack' ct state new drop
+nft add rule inet filter input ct state invalid drop
 nft add rule inet filter input ct state related,established accept
-nft add rule inet filter input iifname "${wan_iface}" drop
+nft add rule inet filter input drop
 
 BOOT_ALPINE='Boot Alpine'
 INSTALL_ALPINE='Install Alpine'
@@ -135,58 +192,14 @@ fi
 
 case "${action}" in
   "${BOOT_ALPINE}")
-    BOOT_ENTRY='Alpine Linux'
-    ARCH='x86_64'
-    VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
-
-    latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${ARCH}/latest-releases.yaml")
-    default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
-
-    echo
-    read -p "Version? [${default_version}] " version
-    echo
-    version=${version:-${default_version}}
-    short_version=$(echo ${version} | sed 's!\.[0-9]*$!!')
-
-    set -x
-
-    iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
-    url="${ALPINE_MIRROR}/v${short_version}/releases/${ARCH}/${iso}"
-
-    wget -c "${url}" "${url}.sha256" "${url}.asc"
-    sha256sum -c "${iso}.sha256"
-
-    echo "${ALPINE_GPG}" | gpg --import
-    gpg --verify "${iso}.asc" "${iso}"
-
-    mount -t iso9660 "${iso}" /mnt
-    cp -a /mnt/* / || :
-    cp -a /mnt/* /boot/ || : # in case if you have a separate /boot partition and the rest of stuff on LVM
-    umount /mnt
-
-    chattr -i /etc/default/grub /etc/update-extlinux.conf || :
-    find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
-    echo "#!/bin/sh
-      cat << EOF
-      menuentry \"${BOOT_ENTRY}\" --unrestricted {
-        linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1 vt.cur_default=0x00790011 usbcore.autosuspend=-1
-        initrd /boot/initramfs-virt
-      }
-      EOF" > /etc/grub.d/99_custom
-    chmod +x /etc/grub.d/99_custom
-    update-grub
-    grub-reboot "${BOOT_ENTRY}"
-
-    sync
-    echo 3 > /proc/sys/vm/drop_caches
-    reboot
+    boot_alpine
     ;;
   "${INSTALL_ALPINE}")
-    download_and_unpack
+    download
     *ohmyvps*/alpine/install.sh
     ;;
   "${INSTALL_GENTOO}")
-    download_and_unpack
+    download
     *ohmyvps*/gentoo/01-run-tmux.sh
     ;;
   *)

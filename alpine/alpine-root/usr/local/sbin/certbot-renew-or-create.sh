@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2024—∞ Alexander Lopatin (https://codonaft.com)
+# Copyright (c) 2024—∞ npub1alptdev5srcw2hxg03567p4k6xs3lgj7f6545suc0rzp0xw98svse7rg94 (https://codonaft.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal

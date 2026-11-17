@@ -12,6 +12,8 @@ ZSH_THEME="gentoo"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+DISABLE_MAGIC_FUNCTIONS="true"
+
 # Set to this to use case-sensitive completion
 # CASE_SENSITIVE="true"
 
