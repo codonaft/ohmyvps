@@ -52,6 +52,7 @@ export WORLD_PACKAGES=(
   macchanger
   mtr
   ncdu
+  netifrc
   nftables
   #nginx-mod-http-brotli
   #nginx
@@ -72,6 +73,13 @@ export WORLD_PACKAGES=(
   yq
   zsh
   zsh-vcs
+)
+
+export ADD_TO_BOOT_RUNLEVEL=(
+  net.lo
+  net.eth0
+  #net.wlan0
+  #networking
 )
 
 export ADD_TO_DEFAULT_RUNLEVEL=(

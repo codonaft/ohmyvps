@@ -1,8 +1,15 @@
 # https://raw.githubusercontent.com/gentoo/netifrc/refs/heads/master/doc/net.example.Linux.in
 
+## for some paranoid VPN'ed laptop used as server
+#dhcp="nodns nogateway nonis nontp nosendhost"
+#mac_eth0="random-samekind"
+#mac_eth1="random-samekind"
+#mac_wlan0="random-samekind"
+#mac_wlan1="random-samekind"
+#modules_wlan1="!dhclient !dhcpcd !udhcpc !iw !iwconfig !wpa_supplicant" # for AP mode
+
 #config_eth0="
 #  192.168.1.2/24
-#  10.20.30.40/16
 #  2001:db8:1::a/64
 #"
 #
@@ -11,11 +18,4 @@
 #  default via 2001:db8:1::1
 #"
 
-dhcp="nodns nogateway nonis nontp nosendhost"
-
-mac_eth0="random-samekind"
-mac_eth1="random-samekind"
-mac_wlan0="random-samekind"
-mac_wlan1="random-samekind"
-
-modules_wlan1="!dhclient !dhcpcd !udhcpc !iw !iwconfig !wpa_supplicant" # for AP mode
+# vim:filetype=sh

@@ -62,7 +62,7 @@ deluser --remove-home alpine || :
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
-vim config.sh
+vim -p config.sh alpine-root/etc/conf.d/net
 source config.sh
 
 export CXXFLAGS="${CFLAGS}"
@@ -164,7 +164,13 @@ rm -rf /var/cache/apk/*
 grub-mkconfig
 grub-install ${TARGET_DISK}
 
+rc-update del networking boot || :
 rc-update del sshd default || :
+
+for i in ${ADD_TO_BOOT_RUNLEVEL[@]} ; do
+  rc-update add "\$i" boot || :
+done
+
 for i in ${ADD_TO_DEFAULT_RUNLEVEL[@]} ; do
   rc-update add "\$i" default || :
 done
