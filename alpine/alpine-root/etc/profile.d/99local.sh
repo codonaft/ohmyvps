@@ -44,8 +44,8 @@ export SSH_ALLOWLIST='/etc/ssh/allowlist.txt'
 
 export SSH_PORT=$( ( grep -E '^Port\s*[0-9]*$' /etc/ssh/sshd_config || echo 'Port 22' ) | awk '{print $2}' | head -n1 )
 
-export WAN_IFACE=$( ( grep -E '^auto (e|w)' /etc/network/interfaces | awk '{print $2}' || ip link show up | grep -E '^[0-9]*: (e|w).* state UP' | awk '{print $2}' | sed 's|:||' ) | head -n1)
-export WAN_IPV4=$( ( grep -A 3 -E '^auto (e|w)' /etc/network/interfaces | grep address | awk '{print $2}' || ip -4 address show up | grep -A 1 -E ': (e|w).* state UP ' | grep '\sinet\s' | awk '{print $2}' | sed 's|/.*||' ) | filter_ipv4 | head -n1)
+export WAN_IFACE=$( ( grep -E '^iface [ew]' /etc/network/interfaces | awk '{print $2}' || ip link show up | grep -E '^[0-9]*: [ew].* state UP' | awk '{print $2}' | sed 's|:||' ) | head -n1)
+export WAN_IPV4=$( ( grep -A 3 -E '^iface [ew]' /etc/network/interfaces | grep address | awk '{print $2}' || ip -4 address show up | grep -A 1 -E ': [ew].* state UP ' | grep '\sinet\s' | awk '{print $2}' | sed 's|/.*||' ) | filter_ipv4 | head -n1)
 export WAN_IPV6_GW=$( ( grep '^\s*gateway' /etc/network/interfaces | awk '{print $2}' || ip -6 route | grep '^default via ' | awk '{print $3}' ) | filter_ipv6 | head -n1)
 
 export TOR_SOCKS5_PORT=$(grep '^\s*SocksPort\s*' /etc/tor/torrc | filter_ipv4 | grep -oE ':[0-9]*(\s|$)' | sed 's|:||;s|\s*||g' | head -n1)

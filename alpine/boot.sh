@@ -70,8 +70,10 @@ echo
 version=${version:-${default_version}}
 short_version=$(echo ${version} | sed 's!\.[0-9]*$!!')
 
-set -x
+set -xeuo pipefail
 
+alpine_latest_stable=$(echo "${alpine_latest_stable}" | sed "s|latest-stable|v${short_version}|")
+latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${ARCH}/latest-releases.yaml")
 iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
 url="${alpine_mirror}/v${short_version}/releases/${ARCH}/${iso}"
 

@@ -1,5 +1,7 @@
 # https://raw.githubusercontent.com/gentoo/netifrc/refs/heads/master/doc/net.example.Linux.in
 
+dhcp="nodns nonis nontp nosendhost"
+
 ## for some paranoid VPN'ed laptop used as server
 #dhcp="nodns nogateway nonis nontp nosendhost"
 #mac_eth0="random-samekind"

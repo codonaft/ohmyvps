@@ -41,26 +41,25 @@ deluser --remove-home alpine || :
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
+setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
+
 vim config.sh
 source config.sh
+export CXXFLAGS="${CFLAGS}"
+export FCFLAGS="${CFLAGS}"
+export FFLAGS="${CFLAGS}"
 
 world_packages=" ${WORLD_PACKAGES[*]} "
 if [[ "${world_packages}" == *" netifrc "* ]] ; then
   vim alpine-root/etc/conf.d/net || :
 else
-  if [[ "${world_packages}" == *" macchanger "* ]] && ! grep -q macchanger /etc/network/interfaces ; then
-    sed --in-place --null-data 's/\n$//' /etc/network/interfaces
-    echo '#  pre-up /usr/bin/macchanger -r ${IFACE}' >>/etc/network/interfaces
-  fi
   vim /etc/network/interfaces || :
 fi
 
-export CXXFLAGS="${CFLAGS}"
-export FCFLAGS="${CFLAGS}"
-export FFLAGS="${CFLAGS}"
-
-setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
 apk add e2fsprogs gcc musl-dev sfdisk
+if [[ "${world_packages}" == *" macchanger "* ]] ; then
+  apk add macchanger
+fi
 
 echo "${ANSWERS}" >.answers.conf
 echo "USEROPTS='none'" >>.answers.conf

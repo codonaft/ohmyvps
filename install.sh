@@ -38,7 +38,7 @@ which apk && {
   chattr -i /etc/apk/repositories || :
   setup-apkrepos "${ALPINE_LATEST_STABLE}/main" "${ALPINE_LATEST_STABLE}/community" && apk add $@
 }
-which apt && apt -y install $@
+which apt && apt -y --no-install-recommends install $@
 
 echo 'applying firewall rules'
 nft flush ruleset
