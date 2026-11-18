@@ -1,5 +1,6 @@
 # do daily/weekly/monthly maintenance
 # min	hour	day	month	weekday	command
+*/5	*	*	*	*	run-parts $HOME/.periodic/5min
 */15	*	*	*	*	run-parts $HOME/.periodic/15min
 0	*	*	*	*	run-parts $HOME/.periodic/hourly
 0	2	*	*	*	run-parts $HOME/.periodic/daily

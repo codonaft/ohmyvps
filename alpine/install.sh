@@ -48,8 +48,9 @@ world_packages=" ${WORLD_PACKAGES[*]} "
 if [[ "${world_packages}" == *" netifrc "* ]] ; then
   vim alpine-root/etc/conf.d/net || :
 else
-  if [[ "${world_packages}" == *" macchanger "* ]] && ! grep -q macchanger ; then
-    echo '  # pre-up /usr/bin/macchanger -r ${IFACE}' >>/etc/network/interfaces || :
+  if [[ "${world_packages}" == *" macchanger "* ]] && ! grep -q macchanger /etc/network/interfaces ; then
+    sed --in-place --null-data 's/\n$//' /etc/network/interfaces
+    echo '#  pre-up /usr/bin/macchanger -r ${IFACE}' >>/etc/network/interfaces
   fi
   vim /etc/network/interfaces || :
 fi
@@ -198,6 +199,8 @@ mv -f /home/USERNAME_WILL_BE_AUTOMATICALLY_REPLACED/{*,.*} "/home/${USERNAME}/"
 rm -rf /home/USERNAME_WILL_BE_AUTOMATICALLY_REPLACED
 chmod 00700 "/home/${USERNAME}"
 chown -R "${USERNAME}:${USERNAME}" "/home/${USERNAME}"
+mv /etc/crontabs/{USERNAME_WILL_BE_AUTOMATICALLY_REPLACED,${USERNAME}}
+chown ${USERNAME}:${USERNAME} /etc/crontabs/${USERNAME}
 
 echo 'installing oh-my-zsh'
 $(declare -f maybe_install_oh_my_zsh)

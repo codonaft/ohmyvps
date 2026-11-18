@@ -1,4 +1,4 @@
-# NOTE: if you don't want to continue, uncomment the next line:
+# NOTE: uncomment the next line if you want to cancel:
 # exit
 
 export TARGET_DISK='/dev/sda'
