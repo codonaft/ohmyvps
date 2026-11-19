@@ -11,7 +11,7 @@ onion {
     policy sequential
     health_check 1s
     failfast_all_unhealthy_upstreams
-    failover SERVFAIL REFUSED
+    #failover SERVFAIL REFUSED
   }
 }
 
@@ -44,7 +44,7 @@ onion {
     policy sequential
     health_check 1s
     failfast_all_unhealthy_upstreams
-    failover SERVFAIL REFUSED
+    #failover SERVFAIL REFUSED
   }
 
   #forward . dns://127.0.0.1:{$UNBOUND_DNS_PORT} {
@@ -52,13 +52,13 @@ onion {
   #  policy sequential
   #  health_check 1s
   #  failfast_all_unhealthy_upstreams
-  #  failover SERVFAIL REFUSED
+  #  #failover SERVFAIL REFUSED
   #}
 
   #forward . tls://9.9.9.11 tls://149.112.112.11 {
   #  policy sequential
   #  health_check 1s
   #  failfast_all_unhealthy_upstreams
-  #  failover SERVFAIL REFUSED
+  #  #failover SERVFAIL REFUSED
   #}
 }

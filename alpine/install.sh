@@ -34,6 +34,7 @@ echo -n >/etc/init.d/openssh || :
 chattr +i /etc/init.d/openssh || :
 
 echo 'disabling tiny-cloud'
+eject LABEL=cidata || :
 tiny-cloud --disable || :
 apk del tiny-cloud-alpine tiny-cloud || :
 deluser --remove-home alpine || :
@@ -41,7 +42,8 @@ deluser --remove-home alpine || :
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
-setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
+short_version=$(sed 's|\.[0-9]*$||' </etc/alpine-release)
+setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/v${short_version}/{main,community} || :
 
 vim config.sh
 source config.sh
@@ -100,8 +102,7 @@ root_partition="${TARGET_DISK}1"
     disk=$(sed 's|/dev/||' <<< ${TARGET_DISK})
     partition=$(sed 's|/dev/||' <<< ${root_partition})
     dev="/sys/block/${disk}/${partition}/dev"
-    major=$(cut -d ':' -f1 < ${dev})
-    minor=$(cut -d ':' -f2 < ${dev})
+    IFS=: read -r major minor <"${dev}"
     mknod -m 660 "${root_partition}" b "${major}" "${minor}"
     chown root:disk "${root_partition}"
   }
@@ -261,27 +262,33 @@ git config --global user.email "root@${VPS_HOSTNAME}"
 
 rm -fv /etc/ssh/ssh_host_*
 
-echo 'nameserver 127.0.0.1' >/etc/resolv.conf || :
-for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/default/grub /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
-  chattr +i "\$i" || :
-done
-
 cd /etc
 rm -f motd || :
 etckeeper init || :
 etckeeper commit Initial || :
 cd /
 
+setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/latest-stable/{main,community} || :
+chattr +i /etc/apk/repositories || :
+
+apk add --no-cache --upgrade apk-tools 2>>/dev/stdout || :
+apk upgrade --no-cache --available 2>>/dev/stdout || :
+apk del doas linux-lts openssh-server-pam syslinux tiny-cloud-alpine tiny-cloud || :
+rm -f /etc/motd
+etckeeper commit Upgrade || :
+
+echo 'nameserver 127.0.0.1' >/etc/resolv.conf || :
+for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/default/grub /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
+  chattr +i "\$i" || :
+done
+
 sync_all
 cat /etc/alpine-release || :
 END
 
-cp /etc/apk/repositories /mnt/etc/apk/repositories
-chattr +i /mnt/etc/apk/repositories
-
 echo 'installing rust'
 apk add --update --no-cache rustup
-rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target x86_64-unknown-linux-musl
+rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target "$(uname -m)-unknown-linux-musl"
 source ~/.cargo/env
 rustc --print target-cpus | grep native | sed 's|.* (currently ||;s|)\.||' >/mnt/etc/target-cpu
 

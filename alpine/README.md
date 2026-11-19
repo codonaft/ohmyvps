@@ -18,20 +18,20 @@ Go to [step 3](#3-install) on success.
 Boot into preinstalled Ubuntu and use it to boot from Alpine installation `.iso`:
 
 ```bash
-sh -c "$(curl -L https://omv.codonaft.com)"
+sh <(curl -L https://omv.codonaft.com)
 ```
 
 or
 
 ```bash
-sh -c "$(wget -O - https://omv.codonaft.com)"
+sh <(wget -O - https://omv.codonaft.com)
 ```
 
 Choose `1` → login as `root` → configure network again.
 
 ### 3. Install
 ```bash
-sh -c "$(wget -O - https://omv.codonaft.com)"
+sh <(wget -O - https://omv.codonaft.com)
 ```
 
 Choose `1`. You will see vim with setup configuration file.

@@ -14,7 +14,7 @@ For experts only. This script doesn't precisely follow Gentoo Handbook, use at y
 2.1. If your VPS doesn't support direct boot from `.iso`, then boot into preinstalled Ubuntu and use netboot:
 
 ```bash
-sh -c "$(curl -L https://omv.codonaft.com)"
+sh <(curl -L https://omv.codonaft.com)
 ```
 
 Choose `2` → `reboot` → wait for boot menu →  `Bootable ISO Image: netboot.xyz` → configure network (if there's no DHCP) → `Linux Network Installs (64-bit)` → `Ubuntu` → latest LTS version → `Rescue Mode`.

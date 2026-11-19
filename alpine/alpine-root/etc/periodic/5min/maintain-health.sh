@@ -38,3 +38,5 @@ ps uax | grep " socat .*${EXTERNAL_TOR_DNS}" | grep -qv grep || {
 }
 
 wait
+
+rc-service --ifcrashed coredns i2pd tor start || :

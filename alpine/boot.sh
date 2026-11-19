@@ -56,11 +56,11 @@ Mkc=
 -----END PGP PUBLIC KEY BLOCK-----'
 
 BOOT_ENTRY='Alpine Linux'
-ARCH='x86_64'
+ARCH=$(uname -m)
 VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
 
 alpine_mirror="$1"
-alpine_latest_stable="$2"
+alpine_latest_stable="${alpine_mirror}/latest-stable"
 latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${ARCH}/latest-releases.yaml")
 default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
 
@@ -68,7 +68,7 @@ echo
 read -p "Version? [${default_version}] " version
 echo
 version=${version:-${default_version}}
-short_version=$(echo ${version} | sed 's!\.[0-9]*$!!')
+short_version=$(echo ${version} | sed 's|\.[0-9]*$||')
 
 set -xeuo pipefail
 
@@ -88,7 +88,7 @@ cp -a /mnt/* / || :
 cp -a /mnt/* /boot/ || : # in case if you have a separate /boot partition and the rest of stuff on LVM
 umount /mnt
 
-chattr -i /etc/default/grub /etc/update-extlinux.conf || :
+chattr -i /etc/default/grub /etc/update-extlinux.conf 2>>/dev/null || :
 find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
 echo "#!/bin/sh
   cat << EOF

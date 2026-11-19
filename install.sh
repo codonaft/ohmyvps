@@ -25,7 +25,6 @@
 set -eu
 
 ALPINE_MIRROR='https://dl-cdn.alpinelinux.org/alpine'
-ALPINE_LATEST_STABLE="${ALPINE_MIRROR}/latest-stable"
 PACKAGES='bash git gnupg htop nftables rsync sed tmux vim wget yq'
 
 if [ "$(id -u)" != '0' ] ; then
@@ -36,7 +35,9 @@ fi
 set -- "${PACKAGES}"
 which apk && {
   chattr -i /etc/apk/repositories || :
-  setup-apkrepos "${ALPINE_LATEST_STABLE}/main" "${ALPINE_LATEST_STABLE}/community" && apk add $@
+  short_version=$(sed 's|\.[0-9]*$||' </etc/alpine-release)
+  alpine_current="${ALPINE_MIRROR}/v${short_version}"
+  setup-apkrepos "${alpine_current}/main" "${alpine_current}/community" && apk add $@
 }
 which apt && apt -y --no-install-recommends install $@
 
@@ -50,9 +51,9 @@ nft add rule inet filter input ct state invalid drop
 nft add rule inet filter input ct state related,established accept
 nft add rule inet filter input drop
 
-rm -rf *ohmyvps*
+rm -rf ohmyvps
 for i in https://github.com/codonaft/ohmyvps ; do
-  git clone --depth=1 "$i" && break
+  git clone --depth=1 "$i" ohmyvps && break
 done
 
 BOOT_ALPINE='Boot Alpine'
@@ -85,13 +86,13 @@ fi
 
 case "${action}" in
   "${BOOT_ALPINE}")
-    *ohmyvps*/alpine/boot.sh "${ALPINE_MIRROR}" "${ALPINE_LATEST_STABLE}"
+    ohmyvps/alpine/boot.sh "${ALPINE_MIRROR}"
     ;;
   "${INSTALL_ALPINE}")
-    *ohmyvps*/alpine/install.sh
+    ohmyvps/alpine/install.sh
     ;;
   "${INSTALL_GENTOO}")
-    *ohmyvps*/gentoo/01-run-tmux.sh
+    ohmyvps/gentoo/01-run-tmux.sh
     ;;
   *)
     ;;
