@@ -104,6 +104,7 @@ case "${action}" in
     ;;
   "${INSTALL_ALPINE}")
     bash -c "
+      $(declare -p PACKAGES)
       $(declare -f wan_is_up)
       $(declare -f enable_firewall)
       $(declare -f clone_ohmyvps)

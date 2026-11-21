@@ -41,7 +41,7 @@ deluser --remove-home alpine || :
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
-vim config.sh
+vim config.sh || :
 source config.sh
 
 [ "${RANDOM_MAC}" = '1' ] && {
@@ -61,7 +61,8 @@ if ! wan_is_up ; then
   apk add nftables || :
   enable_firewall
 
-  apk add git || :
+  set -- "${PACKAGES}"
+  apk add $@ || :
   clone_ohmyvps '/'
   cp -f {,/ohmyvps/alpine}/etc/network/if-pre-up.d/random-mac.sh || :
   cp -f alpine/config.sh /ohmyvps/alpine/
