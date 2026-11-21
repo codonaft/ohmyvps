@@ -1,6 +1,8 @@
+#!/usr/bin/env bash
+
 set -xeuo pipefail
 
-function maybe_install_oh_my_zsh() {
+maybe_install_oh_my_zsh() {
   which zsh && {
     oh_my_zsh_install="https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
     sh -c "$(wget ${oh_my_zsh_install} -O -)"
@@ -9,7 +11,7 @@ function maybe_install_oh_my_zsh() {
   }
 }
 
-function install_rust_crate() {
+install_rust_crate() {
   bin="$1"
   git="$2"
   version="$3"
@@ -18,10 +20,15 @@ function install_rust_crate() {
   mv ~/.cargo/bin/${bin} /mnt/usr/local/bin/
 }
 
-function sync_all() {
+# TODO: use in boot.sh
+sync_all() {
   sync
   echo 3 >/proc/sys/vm/drop_caches
 }
+
+for i in "${ENABLE_FIREWALL}" "${WAN_IS_UP}" "${MAYBE_SET_APK_REPOS}" ; do
+  eval "$i"
+done
 
 script_dir=$(realpath "$(dirname "$0")")
 cd "${script_dir}"
@@ -41,35 +48,31 @@ deluser --remove-home alpine || :
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
-vim config.sh || :
 source config.sh
-
 [ "${RANDOM_MAC}" = '1' ] && {
   sed --in-place '/^\s*exit$/d' 'alpine-root/etc/network/if-pre-up.d/random-mac.sh' || :
 }
-cp -f {alpine-root,}/etc/network/if-pre-up.d/random-mac.sh || :
-cp -f {alpine-root,}/etc/network/ifupdown-ng.conf || :
-
-short_version=$(sed 's|\.[0-9]*$||' </etc/alpine-release)
-setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/v${short_version}/{main,community} || :
+cp -f alpine-root/etc/network/if-pre-up.d/random-mac.sh /etc/network/if-pre-up.d/ || :
+cp -f alpine-root/etc/network/ifupdown-ng.conf /etc/network/ || :
 
 if ! wan_is_up ; then
   setup-dns 9.9.9.9 1.1.1.2 || :
   setup-interfaces || :
-  rc-service start networking || :
+  rc-service networking start || :
 
-  apk add nftables || :
-  enable_firewall
+  # TODO
+#  while ! wan_is_up ; do
+#    sleep 1s
+#  done
 
-  set -- "${PACKAGES}"
-  apk add $@ || :
-  clone_ohmyvps '/'
-  cp -f {,/ohmyvps/alpine}/etc/network/if-pre-up.d/random-mac.sh || :
-  cp -f alpine/config.sh /ohmyvps/alpine/
-  cd /
-
-  exec /ohmyvps/alpine/install.sh
 fi
+
+maybe_set_apk_repos
+apk add nftables || :
+enable_firewall
+
+set -- "${PACKAGES}"
+apk add $@ || :
 
 export CXXFLAGS="${CFLAGS}"
 export FCFLAGS="${CFLAGS}"
@@ -138,7 +141,7 @@ mount --rbind /dev /mnt/dev
 mount --rbind /sys /mnt/sys
 mount --rbind /proc /mnt/proc
 
-[ -d alpine-root/ ] && rsync --archive --no-perms --no-group --no-owner --chmod=go-w alpine-root/ /mnt/
+[ -d alpine-root ] && rsync --archive --no-perms --no-group --no-owner --chmod=go-w alpine-root/ /mnt/
 
 sed --in-place "s|^default_kernel_opts=\"quiet \(.*\)\"$|default_kernel_opts=\"\1 ${KERNEL_OPTS}\"|g;s|^default=.*\$|default=virt|" /mnt/etc/update-extlinux.conf # affects grub as well
 sed --in-place "s|^#Port 22|Port ${SSH_PORT}|;s|^#PasswordAuthentication yes|PasswordAuthentication no|;s|^AllowTcpForwarding no|AllowTcpForwarding yes|" /mnt/etc/ssh/sshd_config

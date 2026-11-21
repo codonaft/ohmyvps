@@ -55,13 +55,14 @@ Mkc=
 =FcYC
 -----END PGP PUBLIC KEY BLOCK-----'
 
-BOOT_ENTRY='Alpine Linux'
-ARCH=$(uname -m)
+BOOT_ENTRY='Install Alpine Linux'
+APKOVL='ohmyvps.apkovl.tar.gz'
+TMPAPKOVL='/tmp/apkovl'
 VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
 
-alpine_mirror="$1"
-alpine_latest_stable="${alpine_mirror}/latest-stable"
-latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${ARCH}/latest-releases.yaml")
+arch=$(uname -m)
+alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
+latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
 default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
 
 echo
@@ -70,12 +71,14 @@ echo
 version=${version:-${default_version}}
 short_version=$(echo ${version} | sed 's|\.[0-9]*$||')
 
+vim ohmyvps/alpine/config.sh || :
+
 set -xeuo pipefail
 
 alpine_latest_stable=$(echo "${alpine_latest_stable}" | sed "s|latest-stable|v${short_version}|")
-latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${ARCH}/latest-releases.yaml")
+latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
 iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
-url="${alpine_mirror}/v${short_version}/releases/${ARCH}/${iso}"
+url="${ALPINE_MIRROR}/v${short_version}/releases/${arch}/${iso}"
 
 wget -c "${url}" "${url}.sha256" "${url}.asc"
 sha256sum -c "${iso}.sha256"
@@ -88,10 +91,29 @@ cp -a /mnt/* / || :
 cp -a /mnt/* /boot/ || : # in case if you have a separate /boot partition and the rest of stuff on LVM
 umount /mnt
 
+mkdir -p "${TMPAPKOVL}/etc/network/if-pre-up.d"
+touch "${TMPAPKOVL}/etc/.default_boot_services"
+cp -f ohmyvps/alpine/alpine-root/etc/network/if-pre-up.d/random-mac.sh ${TMPAPKOVL}/etc/network/if-pre-up.d/
+cp -f ohmyvps/alpine/alpine-root/etc/network/ifupdown-ng.conf ${TMPAPKOVL}/etc/network/
+cp -af ohmyvps "${TMPAPKOVL}"/
+
+apksdir="${TMPAPKOVL}/var/cache/apk/"
+mkdir -p "${apksdir}"
+for r in main community ; do
+  repo="${alpine_latest_stable}/${r}/${arch}"
+  wget -cqO "${apksdir}/APKINDEX.${r}.tar.gz" "${repo}/APKINDEX.tar.gz" || :
+  for i in $(wget -qO- "${repo}/" | grep --only-matching --extended-regexp '"(bash|git|gnupg|htop|readline|macchanger|netifrc|nftables|rsync|sed|tmux|vim|wget|yq)-[0-9].*"' | sed 's|"||g') ; do
+    wget -cqP "${apksdir}" "${repo}/$i" || :
+  done
+done
+
+tar -czpf /"${APKOVL}" -C "${TMPAPKOVL}" .
+cp -af /"${APKOVL}" /boot/
+
 chattr -i /etc/default/grub /etc/update-extlinux.conf 2>>/dev/null || :
 find /etc/default/grub* -type f -print0 | xargs -0 sed --in-place 's!^GRUB_TIMEOUT=.*!GRUB_TIMEOUT=1!;s!^GRUB_TIMEOUT_STYLE=.*!GRUB_TIMEOUT_STYLE=menu!'
 echo "#!/bin/sh
-  cat << EOF
+  cat <<EOF
   menuentry \"${BOOT_ENTRY}\" --unrestricted {
     linux /boot/vmlinuz-virt random.trust_cpu=off init_on_free=1 init_on_alloc=1 vt.cur_default=0x00790011 usbcore.autosuspend=-1
     initrd /boot/initramfs-virt

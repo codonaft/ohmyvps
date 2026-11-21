@@ -24,54 +24,67 @@
 
 set -eu
 
-ALPINE_MIRROR='https://dl-cdn.alpinelinux.org/alpine'
-PACKAGES='bash git gnupg htop nftables rsync sed tmux vim wget yq'
+export PACKAGES='bash git gnupg htop nftables rsync sed tmux vim wget yq'
+export ALPINE_MIRROR='https://dl-cdn.alpinelinux.org/alpine'
 
 BOOT_ALPINE='Boot Alpine'
 INSTALL_ALPINE='Install Alpine'
 INSTALL_GENTOO='Install Gentoo'
 
-clone_ohmyvps() {
-  path="$1"
-  rm -rf ohmyvps
-  for i in https://github.com/codonaft/ohmyvps ; do
-    git clone --depth=1 "$i" "${path}/ohmyvps" && break
-  done
-}
-
-enable_firewall() {
-  echo 'applying firewall rules'
+export ENABLE_FIREWALL='enable_firewall() {
+  echo "applying firewall rules"
   nft flush ruleset
   nft add table inet filter
-  nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }'
-  nft add rule inet filter input iifname 'lo' accept
-  nft add rule inet filter input 'tcp flags != syn / fin,syn,rst,ack' ct state new drop
+  nft add chain inet filter input "{ type filter hook input priority 0; policy accept; }"
+  nft add rule inet filter input iifname "lo" accept
+  nft add rule inet filter input "tcp flags != syn / fin,syn,rst,ack" ct state new drop
   nft add rule inet filter input ct state invalid drop
   nft add rule inet filter input ct state related,established accept
   nft add rule inet filter input drop
+}'
+
+export WAN_IS_UP='wan_is_up() {
+  ip link show up | grep -E "^[0-9]*: [ew].* state UP"
+}'
+
+export MAYBE_SET_APK_REPOS="maybe_set_apk_repos() {
+  if which apk && wan_is_up ; then
+    chattr -i /etc/apk/repositories || :
+    short_version=\$(sed 's|\\.[0-9]*$||' </etc/alpine-release)
+    alpine_current=\${ALPINE_MIRROR}/v\${short_version}
+    setup-apkrepos \${alpine_current}/main \${alpine_current}/community
+  fi
+}"
+
+maybe_clone_ohmyvps() {
+  [ -d /ohmyvps ] && return
+
+  rm -rf /ohmyvps
+  for i in https://github.com/codonaft/ohmyvps ; do
+    git clone --depth=1 "$i" /ohmyvps && break
+  done
 }
 
-wan_is_up() {
-  ip link show up | grep -E '^[0-9]*: [ew].* state UP'
-}
+for i in "${ENABLE_FIREWALL}" "${WAN_IS_UP}" "${MAYBE_SET_APK_REPOS}" ; do
+  eval "$i"
+done
+
+cd /
 
 if [ "$(id -u)" != '0' ] ; then
   echo 'You need to be root'
   exit 1
 fi
 
+maybe_set_apk_repos
+
 if wan_is_up ; then
   set -- "${PACKAGES}"
-  which apk && {
-    chattr -i /etc/apk/repositories || :
-    short_version=$(sed 's|\.[0-9]*$||' </etc/alpine-release)
-    alpine_current="${ALPINE_MIRROR}/v${short_version}"
-    setup-apkrepos "${alpine_current}/main" "${alpine_current}/community" && apk add $@
-  }
+  which apk && apk add $@
   which apt && apt -y --no-install-recommends install $@
 
   enable_firewall
-  clone_ohmyvps '.'
+  maybe_clone_ohmyvps
 fi
 
 clear
@@ -100,16 +113,13 @@ fi
 
 case "${action}" in
   "${BOOT_ALPINE}")
-    ohmyvps/alpine/boot.sh "${ALPINE_MIRROR}"
+    ohmyvps/alpine/boot.sh
     ;;
   "${INSTALL_ALPINE}")
-    bash -c "
-      $(declare -p PACKAGES)
-      $(declare -f wan_is_up)
-      $(declare -f enable_firewall)
-      $(declare -f clone_ohmyvps)
-      $(cat ohmyvps/alpine/install.sh)
-    "
+    for i in readline bash macchanger ; do
+      apk add --force-non-repository "/var/cache/apk/$i"*.apk || :
+    done
+    ohmyvps/alpine/install.sh
     ;;
   "${INSTALL_GENTOO}")
     ohmyvps/gentoo/01-run-tmux.sh
