@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 set -xeuo pipefail
 
 function maybe_install_oh_my_zsh() {
@@ -14,8 +12,9 @@ function maybe_install_oh_my_zsh() {
 function install_rust_crate() {
   bin="$1"
   git="$2"
+  version="$3"
   echo "installing ${bin}"
-  cargo install --force --locked --rev "${QUICSSH_VERSION}" --git "${git}"
+  cargo install --force --locked --rev "${version}" --git "${git}"
   mv ~/.cargo/bin/${bin} /mnt/usr/local/bin/
 }
 
@@ -42,32 +41,45 @@ deluser --remove-home alpine || :
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
+vim config.sh
+source config.sh
+
+[ "${RANDOM_MAC}" = '1' ] && {
+  sed --in-place '/^\s*exit$/d' 'alpine-root/etc/network/if-pre-up.d/random-mac.sh' || :
+}
+cp -f {alpine-root,}/etc/network/if-pre-up.d/random-mac.sh || :
+cp -f {alpine-root,}/etc/network/ifupdown-ng.conf || :
+
 short_version=$(sed 's|\.[0-9]*$||' </etc/alpine-release)
 setup-apkrepos https://dl-cdn.alpinelinux.org/alpine/v${short_version}/{main,community} || :
 
-vim config.sh
-source config.sh
+if ! wan_is_up ; then
+  setup-dns 9.9.9.9 1.1.1.2 || :
+  setup-interfaces || :
+  rc-service start networking || :
+
+  apk add nftables || :
+  enable_firewall
+
+  apk add git || :
+  clone_ohmyvps '/'
+  cp -f {,/ohmyvps/alpine}/etc/network/if-pre-up.d/random-mac.sh || :
+  cp -f alpine/config.sh /ohmyvps/alpine/
+  cd /
+
+  exec /ohmyvps/alpine/install.sh
+fi
+
 export CXXFLAGS="${CFLAGS}"
 export FCFLAGS="${CFLAGS}"
 export FFLAGS="${CFLAGS}"
-
-world_packages=" ${WORLD_PACKAGES[*]} "
-if [[ "${world_packages}" == *" netifrc "* ]] ; then
-  vim alpine-root/etc/conf.d/net || :
-else
-  vim /etc/network/interfaces || :
-fi
-
-apk add e2fsprogs gcc musl-dev sfdisk
-if [[ "${world_packages}" == *" macchanger "* ]] ; then
-  apk add macchanger
-fi
 
 echo "${ANSWERS}" >.answers.conf
 echo "USEROPTS='none'" >>.answers.conf
 echo "APKREPOSOPTS='$(cat /etc/apk/repositories)'" >>.answers.conf
 echo "INTERFACESOPTS='$(cat /etc/network/interfaces)'" >>.answers.conf
 
+apk add e2fsprogs gcc musl-dev sfdisk ||:
 mount | grep -q "${TARGET_DISK}" && {
   echo 'target disk is mounted, fixing it'
   disk_file=$(basename "${TARGET_DISK}")
@@ -292,7 +304,7 @@ rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target 
 source ~/.cargo/env
 rustc --print target-cpus | grep native | sed 's|.* (currently ||;s|)\.||' >/mnt/etc/target-cpu
 
-install_rust_crate 'quicssh-rs' 'https://github.com/aruz/quicssh-rs'
+install_rust_crate 'quicssh-rs' 'https://github.com/aruz/quicssh-rs' "${QUICSSH_VERSION}"
 
 sync_all
 

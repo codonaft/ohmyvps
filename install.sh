@@ -27,38 +27,52 @@ set -eu
 ALPINE_MIRROR='https://dl-cdn.alpinelinux.org/alpine'
 PACKAGES='bash git gnupg htop nftables rsync sed tmux vim wget yq'
 
+BOOT_ALPINE='Boot Alpine'
+INSTALL_ALPINE='Install Alpine'
+INSTALL_GENTOO='Install Gentoo'
+
+clone_ohmyvps() {
+  path="$1"
+  rm -rf ohmyvps
+  for i in https://github.com/codonaft/ohmyvps ; do
+    git clone --depth=1 "$i" "${path}/ohmyvps" && break
+  done
+}
+
+enable_firewall() {
+  echo 'applying firewall rules'
+  nft flush ruleset
+  nft add table inet filter
+  nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }'
+  nft add rule inet filter input iifname 'lo' accept
+  nft add rule inet filter input 'tcp flags != syn / fin,syn,rst,ack' ct state new drop
+  nft add rule inet filter input ct state invalid drop
+  nft add rule inet filter input ct state related,established accept
+  nft add rule inet filter input drop
+}
+
+wan_is_up() {
+  ip link show up | grep -E '^[0-9]*: [ew].* state UP'
+}
+
 if [ "$(id -u)" != '0' ] ; then
   echo 'You need to be root'
   exit 1
 fi
 
-set -- "${PACKAGES}"
-which apk && {
-  chattr -i /etc/apk/repositories || :
-  short_version=$(sed 's|\.[0-9]*$||' </etc/alpine-release)
-  alpine_current="${ALPINE_MIRROR}/v${short_version}"
-  setup-apkrepos "${alpine_current}/main" "${alpine_current}/community" && apk add $@
-}
-which apt && apt -y --no-install-recommends install $@
+if wan_is_up ; then
+  set -- "${PACKAGES}"
+  which apk && {
+    chattr -i /etc/apk/repositories || :
+    short_version=$(sed 's|\.[0-9]*$||' </etc/alpine-release)
+    alpine_current="${ALPINE_MIRROR}/v${short_version}"
+    setup-apkrepos "${alpine_current}/main" "${alpine_current}/community" && apk add $@
+  }
+  which apt && apt -y --no-install-recommends install $@
 
-echo 'applying firewall rules'
-nft flush ruleset
-nft add table inet filter
-nft add chain inet filter input '{ type filter hook input priority 0; policy accept; }'
-nft add rule inet filter input iifname 'lo' accept
-nft add rule inet filter input 'tcp flags != syn / fin,syn,rst,ack' ct state new drop
-nft add rule inet filter input ct state invalid drop
-nft add rule inet filter input ct state related,established accept
-nft add rule inet filter input drop
-
-rm -rf ohmyvps
-for i in https://github.com/codonaft/ohmyvps ; do
-  git clone --depth=1 "$i" ohmyvps && break
-done
-
-BOOT_ALPINE='Boot Alpine'
-INSTALL_ALPINE='Install Alpine'
-INSTALL_GENTOO='Install Gentoo'
+  enable_firewall
+  clone_ohmyvps '.'
+fi
 
 clear
 if [ -d /.modloop ] ; then
@@ -89,7 +103,12 @@ case "${action}" in
     ohmyvps/alpine/boot.sh "${ALPINE_MIRROR}"
     ;;
   "${INSTALL_ALPINE}")
-    ohmyvps/alpine/install.sh
+    bash -c "
+      $(declare -f wan_is_up)
+      $(declare -f enable_firewall)
+      $(declare -f clone_ohmyvps)
+      $(cat ohmyvps/alpine/install.sh)
+    "
     ;;
   "${INSTALL_GENTOO}")
     ohmyvps/gentoo/01-run-tmux.sh

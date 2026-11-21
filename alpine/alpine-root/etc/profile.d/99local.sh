@@ -12,15 +12,15 @@ nft_list() {
   } | nft -f -
 }
 
-filter_no_comment () {
+filter_no_comment() {
   grep -v '^\s*#'
 }
 
-filter_ipv4 () {
+filter_ipv4() {
   filter_no_comment | grepcidr -e '0.0.0.0/0'
 }
 
-filter_ipv6 () {
+filter_ipv6() {
   filter_no_comment | grepcidr -e '::/0'
 }
 

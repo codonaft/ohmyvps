@@ -8,7 +8,7 @@
 
 ```bash
 setup-interfaces
-setup-dns 9.9.9.9 1.1.1.1
+setup-dns 9.9.9.9 1.1.1.2
 /etc/init.d/networking start
 ```
 

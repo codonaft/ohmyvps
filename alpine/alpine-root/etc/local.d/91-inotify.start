@@ -3,7 +3,7 @@
 allowed_services=$(echo 'hostname syslog' ; rc-update show default | sed 's| *||;s| | .*$||')
 tag="$(basename $0)"
 
-apply_deduplicated () {
+apply_deduplicated() {
   action="$1"
   service="$2"
   interval="$3"

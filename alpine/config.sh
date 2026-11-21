@@ -31,6 +31,8 @@ export SSH_ALLOWED_IPS=(
   #2001:db8:3333:4444:5555:6666:7777:8888
 )
 
+export RANDOM_MAC='0'
+
 export WORLD_PACKAGES=(
   bind-tools
   busybox-extras
@@ -56,7 +58,7 @@ export WORLD_PACKAGES=(
   macchanger
   mtr
   ncdu
-  netifrc
+  #netifrc
   nftables
   #nginx-mod-http-brotli
   #nginx

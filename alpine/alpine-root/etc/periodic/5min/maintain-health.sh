@@ -2,11 +2,11 @@
 
 source /etc/profile.d/99local.sh
 
-run_dig () {
+run_dig() {
   sudo -u nobody dig +timeout=60 "$@"
 }
 
-dns_check_and_fix () {
+dns_check_and_fix() {
   domain="$1"
   if run_dig +tcp -p "${EXTERNAL_TOR_DNS_LOCAL_TCP_PORT}" "${domain}" | grep -q NOERROR ; then
     run_dig "${domain}" | grep -q NOERROR || rc-service coredns restart
@@ -15,7 +15,7 @@ dns_check_and_fix () {
   fi
 }
 
-random_domain () {
+random_domain() {
   wget -qO- 'https://api.gentoo.org/mirrors/distfiles.xml' 'https://www.openbsd.org/ftp.html' 'https://archlinux.org/mirrorlist/?protocol=https&ip_version=4' |
     grep -oE 'https?://[^<"]+' |
     sed -E 's|https?://([^/:]+).*|\1|' |

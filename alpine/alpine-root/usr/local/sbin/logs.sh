@@ -2,7 +2,7 @@
 
 source /etc/profile.d/99local.sh
 
-follow () {
+follow() {
   tail -F "${SYSLOG}" /var/log/nginx/{access,error}.log
 }
 
