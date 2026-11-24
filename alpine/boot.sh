@@ -93,6 +93,8 @@ umount /mnt
 
 mkdir -p "${TMPAPKOVL}/etc/network/if-pre-up.d"
 touch "${TMPAPKOVL}/etc/.default_boot_services"
+cp -f ohmyvps/alpine/alpine-root/etc/inittab ${TMPAPKOVL}/etc/
+sed --in-place '/^::wait:\/usr\/bin\/chvt 12$/d;s|^tty1:.*|tty1::wait:/ohmyvps/install.sh 38400 tty1|' ${TMPAPKOVL}/etc/inittab || :
 cp -f ohmyvps/alpine/alpine-root/etc/network/if-pre-up.d/random-mac.sh ${TMPAPKOVL}/etc/network/if-pre-up.d/
 cp -f ohmyvps/alpine/alpine-root/etc/network/ifupdown-ng.conf ${TMPAPKOVL}/etc/network/
 cp -af ohmyvps "${TMPAPKOVL}"/
@@ -101,7 +103,7 @@ apksdir="${TMPAPKOVL}/var/cache/apk/"
 mkdir -p "${apksdir}"
 for r in main community ; do
   repo="${alpine_latest_stable}/${r}/${arch}"
-  for i in $(wget -qO- "${repo}/" | grep --only-matching --extended-regexp '"(bash|readline|macchanger|netifrc)-[0-9].*"' | sed 's|"||g') ; do
+  for i in $(wget -qO- "${repo}/" | grep --only-matching --extended-regexp '"(bash|ifupdown-ng|macchanger|netifrc|readline|sed)-[0-9].*"' | sed 's|"||g') ; do
     wget -cqP "${apksdir}" "${repo}/$i" || :
   done
 done

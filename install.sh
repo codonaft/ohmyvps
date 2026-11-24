@@ -101,7 +101,7 @@ default_choice='1'
 read -p "What's next? [${default_choice}] " choice
 choice="${choice:-${default_choice}}"
 
-if [ "${choice}" = 1 ] ; then
+if [ "${choice}" = '1' ] ; then
   if [ -d /.modloop ] ; then
     action="${INSTALL_ALPINE}"
   else
@@ -116,7 +116,7 @@ case "${action}" in
     ohmyvps/alpine/boot.sh
     ;;
   "${INSTALL_ALPINE}")
-    for i in readline bash macchanger ; do
+    for i in readline bash ifupdown-ng macchanger sed ; do
       apk add --force-non-repository "/var/cache/apk/$i"*.apk || :
     done
     ohmyvps/alpine/install.sh

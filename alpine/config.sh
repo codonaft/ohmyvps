@@ -11,6 +11,7 @@ export KERNEL_OPTS='random.trust_cpu=off init_on_free=1 init_on_alloc=1 vt.cur_d
 
 export SSH_PORT='666'
 export SSH_ALLOW_TCP='0'
+export RANDOM_MAC='0'
 export VPS_HOSTNAME='vps'
 
 export ROOT_SHELL='/bin/zsh'
@@ -30,8 +31,6 @@ export SSH_ALLOWED_IPS=(
   #5.6.7.0/24
   #2001:db8:3333:4444:5555:6666:7777:8888
 )
-
-export RANDOM_MAC='0'
 
 export WORLD_PACKAGES=(
   bind-tools
