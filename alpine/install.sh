@@ -59,12 +59,6 @@ if ! wan_is_up ; then
   setup-dns 9.9.9.9 1.1.1.2 || :
   setup-interfaces || :
   rc-service networking start || :
-
-  # TODO
-#  while ! wan_is_up ; do
-#    sleep 1s
-#  done
-
 fi
 
 maybe_set_apk_repos

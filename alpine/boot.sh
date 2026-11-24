@@ -101,8 +101,7 @@ apksdir="${TMPAPKOVL}/var/cache/apk/"
 mkdir -p "${apksdir}"
 for r in main community ; do
   repo="${alpine_latest_stable}/${r}/${arch}"
-  wget -cqO "${apksdir}/APKINDEX.${r}.tar.gz" "${repo}/APKINDEX.tar.gz" || :
-  for i in $(wget -qO- "${repo}/" | grep --only-matching --extended-regexp '"(bash|git|gnupg|htop|readline|macchanger|netifrc|nftables|rsync|sed|tmux|vim|wget|yq)-[0-9].*"' | sed 's|"||g') ; do
+  for i in $(wget -qO- "${repo}/" | grep --only-matching --extended-regexp '"(bash|readline|macchanger|netifrc)-[0-9].*"' | sed 's|"||g') ; do
     wget -cqP "${apksdir}" "${repo}/$i" || :
   done
 done
