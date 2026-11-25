@@ -16,7 +16,8 @@ install_rust_crate() {
   version="$3"
   echo "installing ${bin}"
   cargo install --force --locked --rev "${version}" --git "${git}"
-  mv ~/.cargo/bin/${bin} /mnt/usr/local/bin/
+  mkdir -p /tmp/bin
+  mv ~/.cargo/bin/${bin} /tmp/bin/
 }
 
 for i in "${ENABLE_FIREWALL}" "${WAN_IS_UP}" "${MAYBE_SET_APK_REPOS}" "${SYNC_ALL}" ; do
@@ -276,7 +277,7 @@ rm -f /etc/motd
 etckeeper commit Upgrade || :
 
 echo 'nameserver 127.0.0.1' >/etc/resolv.conf || :
-for i in /etc/conf.d/{coredns,local,nginx} /etc/resolv.conf /etc/default/grub /etc/update-extlinux.conf /root/.config/htop/htoprc ; do
+for i in /etc/{conf.d/{coredns,local,nginx},resolv.conf,default/grub,update-extlinux.conf} /root/.config/htop/htoprc ; do
   chattr +i "\$i" || :
 done
 
@@ -284,13 +285,18 @@ sync_all
 cat /etc/alpine-release || :
 END
 
-echo 'installing rust'
+echo 'installing rust apps'
 apk add --update --no-cache rustup
-rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" --target "$(uname -m)-unknown-linux-musl"
-source ~/.cargo/env
-rustc --print target-cpus | grep native | sed 's|.* (currently ||;s|)\.||' >/mnt/etc/target-cpu
-
-install_rust_crate 'quicssh-rs' 'https://github.com/aruz/quicssh-rs' "${QUICSSH_VERSION}"
+setup-user rust
+su - rust -c "
+  rustup-init -y --profile minimal --default-toolchain '${RUST_VERSION}' --target '$(uname -m)-unknown-linux-musl'
+  source ~/.cargo/env
+  rustc --print target-cpus | grep native | sed 's|.* (currently ||;s|)\\.||' >/tmp/target-cpu
+  $(declare -f install_rust_crate)
+  install_rust_crate 'quicssh-rs' 'https://github.com/aruz/quicssh-rs' '${QUICSSH_VERSION}'"
+mv /tmp/bin/* /mnt/usr/local/bin/
+mv /tmp/target-cpu /mnt/etc/
+chown root:root /mnt/{etc/target-cpu,usr/local/bin/*}
 
 sync_all
 
