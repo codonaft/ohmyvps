@@ -116,7 +116,7 @@ case "${action}" in
     ohmyvps/alpine/boot.sh
     ;;
   "${INSTALL_ALPINE}")
-    for i in readline bash ifupdown-ng macchanger sed ; do
+    for i in readline bash macchanger sed ; do
       apk add --force-non-repository "/var/cache/apk/$i"*.apk || :
     done
     ohmyvps/alpine/install.sh
