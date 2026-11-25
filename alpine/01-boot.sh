@@ -65,9 +65,8 @@ eval "${SYNC_ALL}"
 arch=$(uname -m)
 alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
 latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
-default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
-short_version=$(echo ${default_version} | sed 's|\.[0-9]*$||')
-sed --in-place "s|^\\(export ALPINE_SHORT_VERSION=\\).*$|\1'${short_version}'|" ohmyvps/alpine/02-config.sh
+default_short_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version" | sed 's|\.[0-9]*$||')
+sed --in-place "s|^\\(export ALPINE_SHORT_VERSION=\\).*$|\1'${default_short_version}'|" ohmyvps/alpine/02-config.sh
 
 for i in vim source ; do
   "$i" ohmyvps/alpine/02-config.sh
