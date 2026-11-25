@@ -94,7 +94,7 @@ umount /mnt
 mkdir -p "${TMPAPKOVL}/etc/network/if-pre-up.d"
 touch "${TMPAPKOVL}/etc/.default_boot_services"
 cp -f ohmyvps/alpine/alpine-root/etc/inittab ${TMPAPKOVL}/etc/ || :
-sed --in-place '/^::wait:\/usr\/bin\/chvt 12$/d;s|^tty1:.*|tty1::wait:/ohmyvps/install.sh 38400 tty1|' ${TMPAPKOVL}/etc/inittab || :
+sed --in-place '/^::wait:\/usr\/bin\/chvt 12$/d;s|^tty1:.*|tty1::wait:/ohmyvps/install.sh 1|' ${TMPAPKOVL}/etc/inittab || :
 
 [ "${RANDOM_MAC}" = '1' ] && {
   sed --in-place '/^\s*exit$/d' ohmyvps/alpine-root/etc/network/if-pre-up.d/random-mac.sh || :

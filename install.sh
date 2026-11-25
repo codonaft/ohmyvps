@@ -102,9 +102,13 @@ else
 fi
 echo
 
-default_choice='1'
-read -p "What's next? [${default_choice}] " choice
-choice="${choice:-${default_choice}}"
+if [ -z "$1" ] ; then
+  default_choice='1'
+  read -p "What's next? [${default_choice}] " choice
+  choice="${choice:-${default_choice}}"
+else
+  choice="$1"
+fi
 
 if [ "${choice}" = '1' ] ; then
   if [ -d /.modloop ] ; then
