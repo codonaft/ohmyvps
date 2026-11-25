@@ -49,11 +49,6 @@ umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
 source config.sh
-[ "${RANDOM_MAC}" = '1' ] && {
-  sed --in-place '/^\s*exit$/d' 'alpine-root/etc/network/if-pre-up.d/random-mac.sh' || :
-}
-cp -f alpine-root/etc/network/if-pre-up.d/random-mac.sh /etc/network/if-pre-up.d/ || :
-cp -f alpine-root/etc/network/ifupdown-ng.conf /etc/network/ || :
 
 if ! wan_is_up ; then
   setup-dns 9.9.9.9 1.1.1.2 || :

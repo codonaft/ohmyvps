@@ -100,6 +100,8 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
   #unbound
 )
 
+export ALPINE_VERSION=''
+
 export RUST_VERSION='1.100.0'
 export QUICSSH_VERSION='f0d508df853c488b65fd1d8d667dfae0bf9d5063'
 
