@@ -42,7 +42,7 @@ deluser --remove-home alpine || :
 umount -l /mnt/{dev,sys,proc} || :
 umount -l /mnt || :
 
-source config.sh
+source 02-config.sh
 
 if ! wan_is_up ; then
   setup-dns 9.9.9.9 1.1.1.2 || :

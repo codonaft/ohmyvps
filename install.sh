@@ -118,13 +118,13 @@ fi
 
 case "${action}" in
   "${BOOT_ALPINE}")
-    ohmyvps/alpine/boot.sh
+    ohmyvps/alpine/01-boot.sh
     ;;
   "${INSTALL_ALPINE}")
     for i in readline bash macchanger sed ; do
       apk add --force-non-repository "/var/cache/apk/$i"*.apk || :
     done
-    ohmyvps/alpine/install.sh
+    ohmyvps/alpine/03-install.sh
     ;;
   "${INSTALL_GENTOO}")
     ohmyvps/gentoo/01-run-tmux.sh
