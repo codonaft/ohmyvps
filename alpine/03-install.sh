@@ -54,8 +54,9 @@ maybe_set_apk_repos
 apk add nftables || :
 enable_firewall
 
-set -- "${PACKAGES}"
-apk add $@
+for i in $(sed 's|\s|\n|g' <<<"${PACKAGES}") ; do
+  apk add "$i"
+done
 
 export CXXFLAGS="${CFLAGS}"
 export FCFLAGS="${CFLAGS}"
