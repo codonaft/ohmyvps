@@ -66,7 +66,8 @@ arch=$(uname -m)
 alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
 latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
 default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
-sed --in-place "s|^\\(export ALPINE_VERSION=\\).*$|\1'${default_version}'|" ohmyvps/alpine/02-config.sh
+short_version=$(echo ${default_version} | sed 's|\.[0-9]*$||')
+sed --in-place "s|^\\(export ALPINE_SHORT_VERSION=\\).*$|\1'${short_version}'|" ohmyvps/alpine/02-config.sh
 
 for i in vim source ; do
   "$i" ohmyvps/alpine/02-config.sh
@@ -74,8 +75,7 @@ done
 
 set -xeuo pipefail
 
-short_version=$(echo ${ALPINE_VERSION} | sed 's|\.[0-9]*$||')
-alpine_latest_stable=$(echo "${alpine_latest_stable}" | sed "s|latest-stable|v${short_version}|")
+alpine_latest_stable=$(echo "${alpine_latest_stable}" | sed "s|latest-stable|v${ALPINE_SHORT_VERSION}|")
 latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
 iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
 url="${ALPINE_MIRROR}/v${short_version}/releases/${arch}/${iso}"

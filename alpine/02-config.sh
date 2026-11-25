@@ -102,7 +102,7 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
 
 # NOTE: the OS will be upgraded to the recent one after successful installation anyway
 # NOTE: if the newest image contains some breaking change, use the older supported version from https://alpinelinux.org/releases
-export ALPINE_VERSION=''
+export ALPINE_SHORT_VERSION=''
 
 export RUST_VERSION='1.100.0'
 export QUICSSH_VERSION='f0d508df853c488b65fd1d8d667dfae0bf9d5063'
