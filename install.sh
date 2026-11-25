@@ -81,6 +81,22 @@ if [ "$(id -u)" != '0' ] ; then
   exit 1
 fi
 
+if [ -d /.modloop ] ; then
+  echo "1. ${INSTALL_ALPINE}"
+else
+  echo "1. ${BOOT_AND_INSTALL_ALPINE}"
+fi
+echo "2. ${INSTALL_GENTOO}"
+
+if [ "$#" = '0' ] ; then
+  default_choice='1'
+  echo
+  read -p "What's next? [${default_choice}] " choice
+  choice="${choice:-${default_choice}}"
+else
+  choice="$1"
+fi
+
 maybe_set_apk_repos
 
 if wan_is_up ; then
@@ -90,24 +106,6 @@ if wan_is_up ; then
 
   enable_firewall
   maybe_clone_ohmyvps
-fi
-
-clear
-if [ -d /.modloop ] ; then
-  echo "1. ${INSTALL_ALPINE}"
-  echo "2. ${INSTALL_GENTOO}"
-else
-  echo "1. ${BOOT_AND_INSTALL_ALPINE}"
-  echo "2. ${INSTALL_GENTOO}"
-fi
-echo
-
-if [ -z "$1" ] ; then
-  default_choice='1'
-  read -p "What's next? [${default_choice}] " choice
-  choice="${choice:-${default_choice}}"
-else
-  choice="$1"
 fi
 
 if [ "${choice}" = '1' ] ; then
