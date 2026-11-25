@@ -24,6 +24,11 @@ filter_ipv6() {
   filter_no_comment | grepcidr -e '::/0'
 }
 
+sync_all() {
+  sync
+  echo 3 >/proc/sys/vm/drop_caches
+}
+
 export RUSTFLAGS='-C target-cpu=native -C force-frame-pointers=y'
 export CFLAGS='-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always'
 export CXXFLAGS='-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always'

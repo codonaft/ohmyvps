@@ -43,8 +43,7 @@ for i in $(grep ':/bin/zsh$' /etc/passwd | cut -d ':' -f1) ; do
   su "$i" -c 'source ~/.zshrc && echo | omz update' >>/dev/null 2>>/dev/stdout | logger || :
 done
 
-sync
-echo 3 > /proc/sys/vm/drop_caches
+sync_all
 for i in $(grep -E '^/dev' </proc/mounts | awk '{print $2}') ; do
   [ $(date +%u) = 2 ] && logger 'running fstrim' && fstrim -v "$i" 2>>/dev/stdout | logger || :
 done

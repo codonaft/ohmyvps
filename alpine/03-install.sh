@@ -4,8 +4,7 @@ set -xeuo pipefail
 
 maybe_install_oh_my_zsh() {
   which zsh && {
-    oh_my_zsh_install="https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-    sh -c "$(wget ${oh_my_zsh_install} -O -)"
+    sh <(wget -O- 'https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh')
     git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
     git clone --depth=1 https://github.com/popstas/zsh-command-time ~/.oh-my-zsh/custom/plugins/command-time
   }
