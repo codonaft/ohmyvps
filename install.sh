@@ -97,6 +97,7 @@ if wan_is_up ; then
   maybe_clone_ohmyvps
 fi
 
+echo
 if [ -d /.modloop ] ; then
   echo "1. ${INSTALL_ALPINE}"
 else

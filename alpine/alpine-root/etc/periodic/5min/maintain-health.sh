@@ -11,7 +11,11 @@ dns_check_and_fix() {
   if run_dig +tcp -p "${EXTERNAL_TOR_DNS_LOCAL_TCP_PORT}" "${domain}" | grep -q NOERROR ; then
     run_dig "${domain}" | grep -q NOERROR || rc-service coredns restart
   else
-    rc-service tor restart
+    page=http://$(sed 's|:.*||' <<<"${EXTERNAL_TOR_DNS}")
+    curl --silent --head --proxy "socks5h://127.0.0.1:${TOR_SOCKS5_PORT}" "${page}" || rc-service tor restart
+    for i in stop start ; do
+      "/etc/local.d/04-tor-dns.$i"
+    done
   fi
 }
 
