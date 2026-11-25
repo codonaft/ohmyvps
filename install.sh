@@ -88,12 +88,7 @@ else
 fi
 echo "2. ${INSTALL_GENTOO}"
 
-if [ "$#" = '0' ] ; then
-  default_choice='1'
-  echo
-  read -p "What's next? [${default_choice}] " choice
-  choice="${choice:-${default_choice}}"
-else
+if [ "$#" -ne '0' ] ; then
   choice="$1"
 fi
 
@@ -106,6 +101,13 @@ if wan_is_up ; then
 
   enable_firewall
   maybe_clone_ohmyvps
+fi
+
+if [ -z "${choice}" ] ; then
+  default_choice='1'
+  echo
+  read -p "What's next? [${default_choice}] " choice
+  choice="${choice:-${default_choice}}"
 fi
 
 if [ "${choice}" = '1' ] ; then
