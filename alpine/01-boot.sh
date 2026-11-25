@@ -77,7 +77,7 @@ set -xeuo pipefail
 alpine_latest_stable=$(echo "${alpine_latest_stable}" | sed "s|latest-stable|v${ALPINE_SHORT_VERSION}|")
 latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
 iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
-url="${ALPINE_MIRROR}/v${short_version}/releases/${arch}/${iso}"
+url="${ALPINE_MIRROR}/v${ALPINE_SHORT_VERSION}/releases/${arch}/${iso}"
 
 wget -c "${url}" "${url}.sha256" "${url}.asc"
 sha256sum -c "${iso}.sha256"

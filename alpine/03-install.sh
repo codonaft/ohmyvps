@@ -202,8 +202,7 @@ mv /etc/crontabs/{USERNAME_WILL_BE_AUTOMATICALLY_REPLACED,${USERNAME}}
 chown ${USERNAME}:${USERNAME} /etc/crontabs/${USERNAME}
 
 echo 'installing oh-my-zsh'
-$(declare -f maybe_install_oh_my_zsh)
-maybe_install_oh_my_zsh
+su - root -c '$(declare -f maybe_install_oh_my_zsh) ; maybe_install_oh_my_zsh'
 su - "${USERNAME}" -c '$(declare -f maybe_install_oh_my_zsh) ; maybe_install_oh_my_zsh'
 [ -e /root/.zshrc.pre-oh-my-zsh ] && mv -fv /root/.zshrc{.pre-oh-my-zsh,}
 [ -e /home/${USERNAME}/.zshrc.pre-oh-my-zsh ] && mv -fv /home/${USERNAME}/.zshrc{.pre-oh-my-zsh,}
