@@ -86,13 +86,6 @@ if [ "$#" -ne '0' ] ; then
   choice="$1"
 fi
 
-if [ -d /.modloop ] ; then
-  echo "1. ${INSTALL_ALPINE}"
-else
-  echo "1. ${BOOT_AND_INSTALL_ALPINE}"
-fi
-echo "2. ${INSTALL_GENTOO}"
-
 maybe_set_apk_repos
 
 if wan_is_up ; then
@@ -103,6 +96,13 @@ if wan_is_up ; then
   enable_firewall
   maybe_clone_ohmyvps
 fi
+
+if [ -d /.modloop ] ; then
+  echo "1. ${INSTALL_ALPINE}"
+else
+  echo "1. ${BOOT_AND_INSTALL_ALPINE}"
+fi
+echo "2. ${INSTALL_GENTOO}"
 
 if [ -z "${choice}" ] ; then
   default_choice='1'
