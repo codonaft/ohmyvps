@@ -105,11 +105,11 @@ export ADD_TO_DEFAULT_RUNLEVEL=(
 export ALPINE_SHORT_VERSION=''
 
 export RUST_VERSION='1.100.0'
-export QUICSSH_VERSION='f0d508df853c488b65fd1d8d667dfae0bf9d5063'
+export QUICSSH_VERSION='1fd2c5611f1e7d62ef32111abb19b21bbd8dea79'
 
 export CFLAGS='-O3 -pipe -march=native -mno-rdrnd -fPIE -fPIC -fstack-protector-all -fstack-clash-protection --param ssp-buffer-size=4 -Wstack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -fdiagnostics-color=always'
 export LDFLAGS='-Wl,-z,now -Wl,-z,relro'
-export RUSTFLAGS='-C target-cpu=native -C force-frame-pointers=y'
+export RUSTFLAGS='-C target-cpu=native -C target-feature=+crt-static -C force-frame-pointers=y'
 
 # https://github.com/alpinelinux/alpine-conf/blob/master/setup-alpine.in
 export ANSWERS="

@@ -15,7 +15,7 @@ install_rust_crate() {
   git="$2"
   version="$3"
   echo "installing ${bin}"
-  cargo install --force --locked --rev "${version}" --git "${git}"
+  cargo install --force --locked --rev "${version}" --git "${git}" --target "$(uname -m)-unknown-linux-musl"
   mkdir -p /tmp/bin
   mv ~/.cargo/bin/${bin} /tmp/bin/
 }
@@ -288,7 +288,7 @@ END
 echo 'installing rust apps'
 apk add --update --no-cache rustup
 setup-user rust
-su - rust -c "
+su rust -c "
   rustup-init -y --profile minimal --default-toolchain '${RUST_VERSION}' --target '$(uname -m)-unknown-linux-musl'
   source ~/.cargo/env
   rustc --print target-cpus | grep native | sed 's|.* (currently ||;s|)\\.||' >/tmp/target-cpu
