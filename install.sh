@@ -56,6 +56,11 @@ export MAYBE_SET_APK_REPOS="maybe_set_apk_repos() {
   fi
 }"
 
+export SYNC_ALL='sync_all() {
+  sync
+  echo 3 >/proc/sys/vm/drop_caches
+}'
+
 maybe_clone_ohmyvps() {
   [ -d /ohmyvps ] && return
 
@@ -65,7 +70,7 @@ maybe_clone_ohmyvps() {
   done
 }
 
-for i in "${ENABLE_FIREWALL}" "${WAN_IS_UP}" "${MAYBE_SET_APK_REPOS}" ; do
+for i in "${ENABLE_FIREWALL}" "${WAN_IS_UP}" "${MAYBE_SET_APK_REPOS}" "${SYNC_ALL}" ; do
   eval "$i"
 done
 

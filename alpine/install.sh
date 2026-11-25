@@ -20,13 +20,7 @@ install_rust_crate() {
   mv ~/.cargo/bin/${bin} /mnt/usr/local/bin/
 }
 
-# TODO: use in boot.sh
-sync_all() {
-  sync
-  echo 3 >/proc/sys/vm/drop_caches
-}
-
-for i in "${ENABLE_FIREWALL}" "${WAN_IS_UP}" "${MAYBE_SET_APK_REPOS}" ; do
+for i in "${ENABLE_FIREWALL}" "${WAN_IS_UP}" "${MAYBE_SET_APK_REPOS}" "${SYNC_ALL}" ; do
   eval "$i"
 done
 

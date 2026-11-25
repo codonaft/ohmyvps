@@ -126,6 +126,5 @@ chmod +x /etc/grub.d/99_custom
 update-grub
 grub-reboot "${BOOT_ENTRY}"
 
-sync
-echo 3 > /proc/sys/vm/drop_caches
+sync_all
 reboot
