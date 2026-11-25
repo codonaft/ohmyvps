@@ -56,7 +56,8 @@ export WAN_IPV6_GW=$( ( grep '^\s*gateway' /etc/network/interfaces | awk '{print
 export TOR_SOCKS5_PORT=$(grep '^\s*SocksPort\s*' /etc/tor/torrc | filter_ipv4 | grep -oE ':[0-9]*(\s|$)' | sed 's|:||;s|\s*||g' | head -n1)
 export TOR_ONION_DNS_UDP_PORT=$(grep '^\s*DNSPort' /etc/tor/torrc | filter_ipv4 | grep -oE ':[0-9]*(\s|$)' | sed 's|:||;s|\s*||g' | head -n1)
 
-export EXTERNAL_TOR_DNS='dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion:53'
+export EXTERNAL_TOR_DNS_HOST='dns4torpnlfs2ifuz2s2yf3fc7rdmsbhm6rw75euj35pac6ap25zgqad.onion'
+export EXTERNAL_TOR_DNS="${EXTERNAL_TOR_DNS_HOST}:53"
 export EXTERNAL_TOR_DNS_LOCAL_TCP_PORT='5350'
 
 export UNBOUND_DNS_PORT=$(grep -o '^\s*interface:.*@[0-9]*' /etc/unbound/unbound.conf | sed 's|.*@||;s|\s*||g' | head -n1)

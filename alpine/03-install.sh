@@ -15,7 +15,7 @@ install_rust_crate() {
   git="$2"
   version="$3"
   echo "installing ${bin}"
-  cargo install --force --locked --rev "${version}" --git "${git}" --target "$(uname -m)-unknown-linux-musl"
+  cargo install --force --locked --rev "${version}" --git "${git}"
   mkdir -p /tmp/bin
   mv ~/.cargo/bin/${bin} /tmp/bin/
 }
