@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # https://alpinelinux.org/keys/ncopa.asc
 # https://github.com/search?q=org%3Aalpinelinux%20ncopa.asc&type=code
@@ -60,19 +60,21 @@ APKOVL='ohmyvps.apkovl.tar.gz'
 TMPAPKOVL='/tmp/apkovl'
 VIRTUAL_REQUEST='.[] | select(.title == "Virtual")'
 
+eval "${SYNC_ALL}"
+
 arch=$(uname -m)
 alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
 latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
 default_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version")
-sed --in-place "s|^\\(export ALPINE_VERSION=\\).*$|\1'${default_version}'|" /ohmyvps/alpine/02-config.sh
+sed --in-place "s|^\\(export ALPINE_VERSION=\\).*$|\1'${default_version}'|" ohmyvps/alpine/02-config.sh
 
-vim /ohmyvps/alpine/02-config.sh
-source /ohmyvps/alpine/02-config.sh
-
-short_version=$(echo ${ALPINE_VERSION} | sed 's|\.[0-9]*$||')
+for i in vim source ; do
+  "$i" ohmyvps/alpine/02-config.sh
+done
 
 set -xeuo pipefail
 
+short_version=$(echo ${ALPINE_VERSION} | sed 's|\.[0-9]*$||')
 alpine_latest_stable=$(echo "${alpine_latest_stable}" | sed "s|latest-stable|v${short_version}|")
 latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
 iso=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .iso")
@@ -91,15 +93,15 @@ umount /mnt
 
 mkdir -p "${TMPAPKOVL}/etc/network/if-pre-up.d"
 touch "${TMPAPKOVL}/etc/.default_boot_services"
-cp -f /ohmyvps/alpine/alpine-root/etc/inittab ${TMPAPKOVL}/etc/
-sed --in-place '/^::wait:\/usr\/bin\/chvt 12$/d;s|^tty1:.*|tty1::wait:/ohmyvps/03-install.sh 38400 tty1|' ${TMPAPKOVL}/etc/inittab || :
+cp -f ohmyvps/alpine/alpine-root/etc/inittab ${TMPAPKOVL}/etc/ || :
+sed --in-place '/^::wait:\/usr\/bin\/chvt 12$/d;s|^tty1:.*|tty1::wait:/ohmyvps/install.sh 38400 tty1|' ${TMPAPKOVL}/etc/inittab || :
 
 [ "${RANDOM_MAC}" = '1' ] && {
-  sed --in-place '/^\s*exit$/d' /ohmyvps/alpine-root/etc/network/if-pre-up.d/random-mac.sh || :
+  sed --in-place '/^\s*exit$/d' ohmyvps/alpine-root/etc/network/if-pre-up.d/random-mac.sh || :
 }
-cp -f /ohmyvps/alpine/alpine-root/etc/network/if-pre-up.d/random-mac.sh ${TMPAPKOVL}/etc/network/if-pre-up.d/
-cp -f /ohmyvps/alpine/alpine-root/etc/network/ifupdown-ng.conf ${TMPAPKOVL}/etc/network/
-cp -af /ohmyvps "${TMPAPKOVL}"/
+cp -f ohmyvps/alpine/alpine-root/etc/network/if-pre-up.d/random-mac.sh ${TMPAPKOVL}/etc/network/if-pre-up.d/
+cp -f ohmyvps/alpine/alpine-root/etc/network/ifupdown-ng.conf ${TMPAPKOVL}/etc/network/
+cp -af ohmyvps "${TMPAPKOVL}"/
 
 apksdir="${TMPAPKOVL}/var/cache/apk/"
 mkdir -p "${apksdir}"
