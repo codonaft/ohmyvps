@@ -27,7 +27,7 @@ set -eu
 export PACKAGES='bash git gnupg htop nftables rsync sed tmux vim wget yq'
 export ALPINE_MIRROR='https://dl-cdn.alpinelinux.org/alpine'
 
-BOOT_ALPINE='Boot Alpine'
+BOOT_AND_INSTALL_ALPINE='Boot and Install Alpine'
 INSTALL_ALPINE='Install Alpine'
 INSTALL_GENTOO='Install Gentoo'
 
@@ -66,7 +66,7 @@ maybe_clone_ohmyvps() {
 
   rm -rf /ohmyvps
   for i in https://github.com/codonaft/ohmyvps ; do
-    git clone --depth=1 "$i" /ohmyvps && break
+    git clone --depth=1 "$i" ohmyvps && break
   done
 }
 
@@ -97,7 +97,7 @@ if [ -d /.modloop ] ; then
   echo "1. ${INSTALL_ALPINE}"
   echo "2. ${INSTALL_GENTOO}"
 else
-  echo "1. ${BOOT_ALPINE}"
+  echo "1. ${BOOT_AND_INSTALL_ALPINE}"
   echo "2. ${INSTALL_GENTOO}"
 fi
 echo
@@ -110,14 +110,14 @@ if [ "${choice}" = '1' ] ; then
   if [ -d /.modloop ] ; then
     action="${INSTALL_ALPINE}"
   else
-    action="${BOOT_ALPINE}"
+    action="${BOOT_AND_INSTALL_ALPINE}"
   fi
 else
   action="${INSTALL_GENTOO}"
 fi
 
 case "${action}" in
-  "${BOOT_ALPINE}")
+  "${BOOT_AND_INSTALL_ALPINE}")
     ohmyvps/alpine/01-boot.sh
     ;;
   "${INSTALL_ALPINE}")

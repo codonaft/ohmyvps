@@ -112,7 +112,6 @@ export LDFLAGS='-Wl,-z,now -Wl,-z,relro'
 export RUSTFLAGS='-C target-cpu=native -C force-frame-pointers=y'
 
 # https://github.com/alpinelinux/alpine-conf/blob/master/setup-alpine.in
-
 export ANSWERS="
 KEYMAPOPTS='none'
 

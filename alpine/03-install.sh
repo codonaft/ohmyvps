@@ -54,10 +54,8 @@ maybe_set_apk_repos
 apk add nftables || :
 enable_firewall
 
-set -f
 set -- "${PACKAGES}"
-set +f
-apk add "$@" || :
+apk add $@
 
 export CXXFLAGS="${CFLAGS}"
 export FCFLAGS="${CFLAGS}"
