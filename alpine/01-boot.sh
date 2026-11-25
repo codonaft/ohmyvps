@@ -67,6 +67,7 @@ alpine_latest_stable="${ALPINE_MIRROR}/latest-stable"
 latest_releases=$(wget -qO - "${alpine_latest_stable}/releases/${arch}/latest-releases.yaml")
 default_short_version=$(echo "${latest_releases}" | yq -r "${VIRTUAL_REQUEST} | .version" | sed 's|\.[0-9]*$||')
 sed --in-place "s|^\\(export ALPINE_SHORT_VERSION=\\).*$|\1'${default_short_version}'|" ohmyvps/alpine/02-config.sh
+sed --in-place "s|^\\(export TARGET_DISK=\\).*$|\1'$(ls -1 /dev/{sda,vda,nvme0n1} 2>/dev/null | head -1)'|" ohmyvps/alpine/02-config.sh
 
 for i in vim source ; do
   "$i" ohmyvps/alpine/02-config.sh

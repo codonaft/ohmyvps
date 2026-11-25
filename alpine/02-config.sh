@@ -1,7 +1,7 @@
 # NOTE: uncomment the next line if you want to cancel:
 # exit
 
-export TARGET_DISK='/dev/sda'
+export TARGET_DISK=''
 
 export FORMAT_DISK='1' # NOTE: 1 will create dos partition table with a single ext4 partition!
 export MKFS_OPTS='fast_commit'
