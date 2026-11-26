@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-logger 'apk-autoupgrade'
-
 APKS=(
   i2pd
   nginx
@@ -26,6 +24,14 @@ apks_version_signature() {
 apks_changed() {
   [[ "${version_signatures[$1]}" != $(apks_version_signature "$1") ]]
 }
+
+script_name=$(basename "$0")
+ps uax | grep "${script_name}" | grep -v name >>/dev/null && {
+  logger "${script_name} is already running"
+  exit 1
+}
+
+logger "${script_name}"
 
 services[openssh]='sshd'
 for i in "${APKS[@]}" ; do
