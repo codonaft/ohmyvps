@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+ln -sf /dev/null messages.0 || :
+
 (
   HARD_REBOOT="/tmp/hard_reboot"
   [ -e "${HARD_REBOOT}" ] || echo '

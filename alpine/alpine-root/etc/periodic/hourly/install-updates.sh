@@ -26,10 +26,10 @@ apks_changed() {
 }
 
 script_name=$(basename "$0")
-ps uax | grep "${script_name}" | grep -v name >>/dev/null && {
+if [[ $(ps uax | grep "sh .*/${script_name}" | grep -v grep | wc -l) -gt '2' ]] ; then
   logger "${script_name} is already running"
   exit 1
-}
+fi
 
 logger "${script_name}"
 
